@@ -5,29 +5,42 @@ import { useEffect, useState } from "react";
 import Sidebar from "./sidebar/page";
 import { GiHamburgerMenu } from "react-icons/gi";
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const user = "user"; // replace with actual auth check
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [mounted, setMounted] = useState(false); // <-- fix
+  const [mounted, setMounted] = useState(false);
+  const [user, setUser] = useState<null | object>(null);
 
   useEffect(() => {
-    setMounted(true); // component is mounted on client
-    if (!user) {
-      router.push("/login");
-    }
-  }, [user, router]);
+    setMounted(true);
 
-  if (!user) return null;
-  if (!mounted) return null; // <-- prevent SSR mismatch
+    // ✅ Check auth token
+    const token = localStorage.getItem("token");
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+
+    // (Optional) You could validate token with backend
+    // fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/validate`, {
+    //   headers: { Authorization: `Bearer ${token}` }
+    // })
+    //   .then(res => {
+    //     if (!res.ok) throw new Error("Invalid token");
+    //     return res.json();
+    //   })
+    //   .then(data => setUser(data.user))
+    //   .catch(() => router.push("/login"));
+
+    // For now, just mark user as logged in
+    setUser({ token });
+  }, [router]);
+
+  if (!mounted) return null;
+  if (!user) return null; // no user yet → show nothing (or a loading spinner)
 
   return (
     <div className="flex min-h-screen bg-gray-50 relative">
-
       {/* Desktop Sidebar */}
       <div className="hidden lg:flex lg:w-64 lg:flex-shrink-0 lg:h-screen fixed lg:top-0 lg:left-0 z-20">
         <Sidebar />
@@ -50,9 +63,7 @@ export default function AdminLayout({
       )}
 
       {/* Main Content */}
-      <main
-        className={`flex-1 flex flex-col w-full lg:ml-64 p-4 sm:p-6 lg:p-8 overflow-auto transition-all duration-300`}
-      >
+      <main className="flex-1 flex flex-col w-full lg:ml-64 p-4 sm:p-6 lg:p-8 overflow-auto transition-all duration-300">
         {children}
       </main>
 

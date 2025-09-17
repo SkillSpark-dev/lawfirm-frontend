@@ -67,7 +67,7 @@ function Header() {
               <a
                 key={idx}
                 href={link.href}
-                className="text-sm hover:text-blue-600"
+                className="text-sm text-black hover:text-blue-600"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}

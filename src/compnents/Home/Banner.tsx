@@ -17,9 +17,11 @@ function Banner() {
           <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-3 sm:mb-4 text-gray-950">
             Litigation & Dispute Resolution
           </h2>
+           
           <button className="flex items-center gap-2 text-m sm:text-base font-medium text-black hover:text-blue-600">
-            Services <FaArrowRight />
+          <a href="/services">Services <FaArrowRight /></a>
           </button>
+         
         </div>
 
         {/* Middle Image */}

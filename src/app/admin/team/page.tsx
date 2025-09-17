@@ -1,400 +1,277 @@
 "use client";
 
-import { useState, ChangeEvent } from "react";
+import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { FaLinkedin, FaFacebook } from "react-icons/fa";
+
+interface SocialLinks {
+  linkedin?: string;
+  facebook?: string;
+}
 
 interface TeamMember {
-  id: number;
+  _id?: string;
   name: string;
-  role: string;
-  email: string;
-  photo?: string; // base64
-  position?: string;
-  description?: string;
-  social?: {
-    linkedin?: string;
-    twitter?: string;
-    facebook?: string;
-  };
+  position: string;
+  bio: string;
+  image?: { public_id?: string; url?: string };
+  socialLinks?: SocialLinks;
 }
 
 export default function AdminTeamPage() {
-  const [team, setTeam] = useState<TeamMember[]>([
-    {
-      id: 1,
-      name: "Alice Johnson",
-      role: "Manager",
-      email: "alice@example.com",
-      position: "CEO",
-      description: "Leading the company",
-      social: { linkedin: "", twitter: "", facebook: "" },
-    },
-    {
-      id: 2,
-      name: "Bob Smith",
-      role: "Developer",
-      email: "bob@example.com",
-      position: "Frontend Developer",
-      description: "Building amazing UI",
-      social: { linkedin: "", twitter: "", facebook: "" },
-    },
-  ]);
+  const [team, setTeam] = useState<TeamMember[]>([]);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
-  const [form, setForm] = useState<Omit<TeamMember, "id">>({
-    name: "",
-    role: "",
-    email: "",
-    photo: "",
-    position: "",
-    description: "",
-    social: { linkedin: "", twitter: "", facebook: "" },
+  const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<TeamMember>({
+    defaultValues: {
+      name: "",
+      position: "",
+      bio: "",
+      socialLinks: { linkedin: "", facebook: "" },
+    },
   });
 
-  const [editId, setEditId] = useState<number | null>(null);
+  useEffect(() => {
+    fetchTeam();
+  }, []);
 
-  // Handle input change
-  const handleChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    if (name.startsWith("social.")) {
-      const key = name.split(".")[1];
-      setForm({
-        ...form,
-        social: { ...form.social, [key]: value },
+  /** Fetch Team Members */
+  async function fetchTeam() {
+    if (!token) return;
+    setLoading(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-    } else {
-      setForm({ ...form, [name]: value });
+      const data = await res.json();
+      setTeam(data.data || []);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  // Handle image upload
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-/*************  ✨ Windsurf Command ⭐  *************/
-    // Once the image has been read, set the form photo to the read image
-    // as a base64 string.
-/*******  309acba2-3533-4f48-ba5b-2afd3cd261bc  *******/    const file = e.target.files?.[0];
-    if (!file) return;
+  /** Handle Image Preview */
+  function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setForm({ ...form, photo: reader.result as string });
-    };
-    reader.readAsDataURL(file);
-  };
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => setPreview(reader.result as string);
+      reader.readAsDataURL(file);
+    } else {
+      setPreview(null);
+    }
+  }
 
-  // Add new member
-  const handleAdd = () => {
-    if (!form.name || !form.role || !form.email) return;
-    setTeam([...team, { id: Date.now(), ...form }]);
-    resetForm();
-  };
+  /** Submit Form */
+  async function onSubmit(data: TeamMember) {
+    if (!token) return alert("You must be logged in");
+    setSubmitting(true);
 
-  // Edit member
-  const handleEdit = (member: TeamMember) => {
-    setEditId(member.id);
-    setForm({ ...member });
-  };
+    try {
+      const url = editId
+        ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/team/${editId}`
+        : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/team`;
+      const method = editId ? "PATCH" : "POST";
 
-  // Save edited member
-  const handleSave = () => {
-    if (editId === null) return;
-    setTeam(team.map((m) => (m.id === editId ? { id: editId, ...form } : m)));
-    setEditId(null);
-    resetForm();
-  };
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("position", data.position);
+      formData.append("bio", data.bio || "");
+      formData.append("socialLinks", JSON.stringify(data.socialLinks || {}));
 
-  // Delete member
-  const handleDelete = (id: number) => {
-    setTeam(team.filter((m) => m.id !== id));
-  };
+      if (selectedFile) formData.append("image", selectedFile);
 
-  // Reset form
-  const resetForm = () => {
-    setForm({
-      name: "",
-      role: "",
-      email: "",
-      photo: "",
-      position: "",
-      description: "",
-      social: { linkedin: "", twitter: "", facebook: "" },
+      const res = await fetch(url, {
+        method,
+        body: formData,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Failed to save");
+      }
+
+      reset();
+      setSelectedFile(null);
+      setPreview(null);
+      setEditId(null);
+      fetchTeam();
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  /** Edit Member */
+  function handleEdit(member: TeamMember) {
+    setEditId(member._id || null);
+    reset({
+      ...member,
+      image: member.image,
     });
-  };
+    setPreview(member.image?.url || null);
+    setSelectedFile(null);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /** Delete Member */
+  async function handleDelete(id?: string) {
+    if (!id || !confirm("Are you sure you want to delete this member?")) return;
+    if (!token) return alert("You must be logged in");
+
+    setLoading(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team/${id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        const errData = await res.json();
+        throw new Error(errData.message || "Failed to delete");
+      }
+      fetchTeam();
+    } catch (err) {
+      console.error(err);
+      alert(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen space-y-6">
-      <h1 className="text-2xl font-bold mb-6 text-center sm:text-left">
-        Manage Team
-      </h1>
+    <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen space-y-6 relative">
+      {/* Loading Overlay */}
+      {loading && (
+        <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
+          <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+        </div>
+      )}
+
+      <h1 className="text-2xl font-bold text-center sm:text-left">Manage Team</h1>
 
       {/* Form */}
-      <div className="bg-white shadow rounded-lg p-6 mb-6 max-w-lg mx-auto">
-        <h2 className="text-lg font-semibold mb-4">
-          {editId ? "Edit Team Member" : "Add Team Member"}
-        </h2>
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white shadow rounded-lg p-6 max-w-lg mx-auto space-y-4"
+      >
+        <h2 className="text-lg font-semibold">{editId ? "Edit Member" : "Add Member"}</h2>
 
-        <input
-          type="text"
-          name="name"
-          placeholder="Name"
-          value={form.name}
-          onChange={handleChange}
-          className="w-full border rounded p-2 mb-3"
-        />
-        <input
-          type="text"
-          name="role"
-          placeholder="Role"
-          value={form.role}
-          onChange={handleChange}
-          className="w-full border rounded p-2 mb-3"
-        />
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={form.email}
-          onChange={handleChange}
-          className="w-full border rounded p-2 mb-3"
-        />
-        <input
-          type="text"
-          name="position"
-          placeholder="Position"
-          value={form.position}
-          onChange={handleChange}
-          className="w-full border rounded p-2 mb-3"
-        />
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={form.description}
-          onChange={handleChange}
-          rows={3}
-          className="w-full border rounded p-2 mb-3"
-        />
-
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Photo
-        </label>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleImageChange}
-          className="w-full mb-3 border rounded p-2"
-        />
-        {form.photo && (
-          <img
-            src={form.photo}
-            alt="Preview"
-            className="w-24 h-24 object-cover rounded mb-3"
-          />
-        )}
-
-        <div className="space-y-2">
-          <h3 className="font-semibold">Social Links</h3>
-          <input
-            type="text"
-            name="social.linkedin"
-            placeholder="LinkedIn"
-            value={form.social?.linkedin || ""}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mb-2"
-          />
-          <input
-            type="text"
-            name="social.twitter"
-            placeholder="Twitter"
-            value={form.social?.twitter || ""}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mb-2"
-          />
-          <input
-            type="text"
-            name="social.facebook"
-            placeholder="Facebook"
-            value={form.social?.facebook || ""}
-            onChange={handleChange}
-            className="w-full border rounded p-2 mb-2"
-          />
+        <div>
+          <label className="block mb-1 font-medium">Name</label>
+          <input {...register("name", { required: "Name is required" })} className="w-full border rounded p-2" />
+          {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
         </div>
 
-        <div className="flex gap-4 flex-wrap mt-4">
-          {editId ? (
-            <>
-              <button
-                onClick={handleSave}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
-              >
-                Save
+        <div>
+          <label className="block mb-1 font-medium">Position</label>
+          <input {...register("position", { required: "Position is required" })} className="w-full border rounded p-2" />
+          {errors.position && <p className="text-red-500 text-sm">{errors.position.message}</p>}
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Bio</label>
+          <textarea {...register("bio")} rows={3} className="w-full border rounded p-2" />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Profile Image</label>
+          <input type="file" accept="image/*" onChange={handleImageChange} className="w-full border rounded p-2" />
+          {preview && (
+            <div className="flex items-center gap-2 mt-2">
+              <img src={preview} alt="Preview" className="w-24 h-24 object-cover rounded" />
+              <button type="button" onClick={() => { setPreview(null); setSelectedFile(null); }} className="text-red-500">
+                Remove
               </button>
-              <button
-                onClick={resetForm}
-                className="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500"
-              >
-                Cancel
-              </button>
-            </>
-          ) : (
+            </div>
+          )}
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">LinkedIn</label>
+          <input {...register("socialLinks.linkedin")} placeholder="LinkedIn URL" className="w-full border rounded p-2" />
+        </div>
+
+        <div>
+          <label className="block mb-1 font-medium">Facebook</label>
+          <input {...register("socialLinks.facebook")} placeholder="Facebook URL" className="w-full border rounded p-2" />
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            type="submit"
+            disabled={submitting}
+            className={`flex-1 px-4 py-2 rounded text-white ${submitting ? "bg-gray-400" : "bg-green-600 hover:bg-green-700"}`}
+          >
+            {editId ? "Save Changes" : "+ Add Member"}
+          </button>
+          {editId && (
             <button
-              onClick={handleAdd}
-              className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+              type="button"
+              onClick={() => { setEditId(null); reset(); setPreview(null); setSelectedFile(null); }}
+              className="flex-1 bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
             >
-              + Add Member
+              Cancel
             </button>
           )}
         </div>
-      </div>
+      </form>
 
-      {/* Team Table / Cards */}
-      <div className="bg-white shadow rounded-lg p-4 sm:p-6 overflow-x-auto">
-        <h2 className="text-lg font-semibold mb-4">Team Members</h2>
-
-        {/* Desktop Table */}
-        <div className="hidden md:block">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100 text-left">
-                <th className="border p-2">Photo</th>
-                <th className="border p-2">Name</th>
-                <th className="border p-2">Role</th>
-                <th className="border p-2">Position</th>
-                <th className="border p-2">Description</th>
-                <th className="border p-2">Email</th>
-                <th className="border p-2">Social</th>
-                <th className="border p-2 text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {team.map((m) => (
-                <tr key={m.id} className="border-b">
-                  <td className="border p-2">
-                    {m.photo ? (
-                      <img
-                        src={m.photo}
-                        alt={m.name}
-                        className="w-12 h-12 object-cover rounded-full"
-                      />
-                    ) : (
-                      <div className="w-12 h-12 bg-gray-200 rounded-full" />
-                    )}
-                  </td>
-                  <td className="border p-2">{m.name}</td>
-                  <td className="border p-2">{m.role}</td>
-                  <td className="border p-2">{m.position}</td>
-                  <td className="border p-2">{m.description}</td>
-                  <td className="border p-2">{m.email}</td>
-                  <td className="border p-2 flex flex-col gap-1">
-                    {m.social?.linkedin && (
-                      <a
-                        href={m.social.linkedin}
-                        className="text-blue-600 underline"
-                      >
-                        LinkedIn
-                      </a>
-                    )}
-                    {m.social?.twitter && (
-                      <a
-                        href={m.social.twitter}
-                        className="text-blue-400 underline"
-                      >
-                        Twitter
-                      </a>
-                    )}
-                    {m.social?.facebook && (
-                      <a
-                        href={m.social.facebook}
-                        className="text-blue-800 underline"
-                      >
-                        Facebook
-                      </a>
-                    )}
-                  </td>
-                  <td className="border p-2 flex gap-2 justify-center flex-wrap">
-                    <button
-                      onClick={() => handleEdit(m)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
-                    >
-                      Edit
-                    </button>
-                    <button
-                      onClick={() => handleDelete(m.id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700"
-                    >
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-              {team.length === 0 && (
-                <tr>
-                  <td
-                    colSpan={8}
-                    className="text-center text-gray-500 py-4"
-                  >
-                    No team members found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-
-        {/* Mobile Cards */}
-        <div className="grid gap-4 md:hidden">
-          {team.map((m) => (
-            <div
-              key={m.id}
-              className="border rounded-lg p-4 shadow-sm flex flex-col items-start"
-            >
-              {m.photo ? (
-                <img
-                  src={m.photo}
-                  alt={m.name}
-                  className="w-24 h-24 object-cover rounded-full mb-2"
-                />
+      {/* Team Cards */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {team.length ? (
+          team.map((m) => (
+            <div key={m._id} className="bg-white shadow rounded-lg p-4 flex flex-col items-center space-y-2">
+              {m.image?.url ? (
+                <img src={m.image.url} alt={m.name} className="w-24 h-24 object-cover rounded-full" />
               ) : (
-                <div className="w-24 h-24 bg-gray-200 rounded-full mb-2" />
+                <div className="w-24 h-24 bg-gray-200 rounded-full" />
               )}
               <p className="font-semibold">{m.name}</p>
-              <p className="text-sm text-gray-600">{m.role}</p>
               <p className="text-sm text-gray-600">{m.position}</p>
-              <p className="text-sm text-gray-700">{m.description}</p>
-              <p className="text-sm text-gray-600">{m.email}</p>
-              <div className="flex flex-col gap-1 mt-2">
-                {m.social?.linkedin && (
-                  <a href={m.social.linkedin} className="text-blue-600 underline">
-                    LinkedIn
+              <p className="text-sm text-gray-600 text-center">{m.bio}</p>
+              <div className="flex gap-2 mt-1">
+                {m.socialLinks?.linkedin && (
+                  <a href={m.socialLinks.linkedin} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-800">
+                    <FaLinkedin size={20} />
                   </a>
                 )}
-                {m.social?.twitter && (
-                  <a href={m.social.twitter} className="text-blue-400 underline">
-                    Twitter
-                  </a>
-                )}
-                {m.social?.facebook && (
-                  <a href={m.social.facebook} className="text-blue-800 underline">
-                    Facebook
+                {m.socialLinks?.facebook && (
+                  <a href={m.socialLinks.facebook} target="_blank" rel="noopener noreferrer" className="text-blue-800 hover:text-blue-900">
+                    <FaFacebook size={20} />
                   </a>
                 )}
               </div>
-              <div className="flex gap-2 mt-3 w-full">
-                <button
-                  onClick={() => handleEdit(m)}
-                  className="flex-1 bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700"
-                >
+              <div className="flex gap-2 mt-2 w-full">
+                <button onClick={() => handleEdit(m)} className="flex-1 bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700">
                   Edit
                 </button>
-                <button
-                  onClick={() => handleDelete(m.id)}
-                  className="flex-1 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700"
-                >
+                <button onClick={() => handleDelete(m._id)} className="flex-1 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700">
                   Delete
                 </button>
               </div>
             </div>
-          ))}
-        </div>
+          ))
+        ) : (
+          <p className="text-center text-gray-500 col-span-full">No team members found</p>
+        )}
       </div>
     </div>
   );

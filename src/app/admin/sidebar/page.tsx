@@ -21,14 +21,17 @@ interface NavItem {
 }
 
 const navLinks: NavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: <RiDashboardLine size={20} /> },
+  
   { href: "/admin/home", label: "Home", icon: <RiDashboardLine size={20} /> },
   { href: "/admin/about", label: "About", icon: <RiDashboardLine size={20} /> },
-  { href: "/admin/cases", label: "Cases", icon: <RiFolderChartLine size={20} /> },
+  { href: "/admin/aboutsection", label: "About Section", icon: <RiDashboardLine size={20} /> },
+  { href: "/admin/appointment", label: "Appointment", icon: <RiFolderChartLine size={20} /> },
   { href: "/admin/team", label: "Team", icon: <RiTeamLine size={20} /> },
   { href: "/admin/services", label: "Services", icon: <RiMoneyDollarCircleLine size={20} /> },
   { href: "/admin/contact", label: "Contact", icon: <RiFileListLine size={20} /> },
-  { href: "/admin/images", label: "Images", icon: <ImImages size={20} /> },
+  {href: "/admin/testimonial", label: "Testimonial", icon: <ImImages size={20} />},
+  
+  
 ];
 
 export default function Sidebar() {

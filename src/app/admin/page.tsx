@@ -1,7 +1,4 @@
-// app/admin/dashboard/page.tsx
-import DashboardStats from "@/compnents/Admin/DashboardStates";
-import RecentCases from "@/compnents/Admin/RecentCases";
-import RevenueChart from "@/compnents/Admin/ReveneuChart";
+
 
 export default function DashboardPage() {
   return (
@@ -14,21 +11,8 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      {/* Dashboard Stats */}
-      <DashboardStats />
-
-      {/* Charts and recent cases */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Revenue chart */}
-        <div className="bg-white p-4 rounded-lg shadow overflow-auto">
-          <RevenueChart />
-        </div>
-
-        {/* Recent Cases table / component */}
-        <div className="bg-white p-4 rounded-lg shadow overflow-auto">
-          <RecentCases />
-        </div>
-      </div>
+     
+      
     </div>
   );
 }

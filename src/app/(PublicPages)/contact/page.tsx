@@ -1,346 +1,153 @@
-// app/contact/page.tsx
 "use client";
 
+import { useForm } from "react-hook-form";
 import { useState } from "react";
-import Link from "next/link";
-import Header from "@/compnents/Header";
-import Footer from "@/compnents/Footer";
-import Image from "next/image";
-import { FaPhoneAlt } from "react-icons/fa";
-import { TfiEmail } from "react-icons/tfi";
-import { IoLocation } from "react-icons/io5";
-import { MdAccessTime } from "react-icons/md";
+import { motion } from "framer-motion";
+import { formVariants, sectionHover } from "@/app/animation";
+
+interface ContactFormData {
+  name: string;
+  email: string;
+  number: string;
+  message: string;
+}
 
 export default function ContactPage() {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    subject: "",
-    message: "",
-    caseType: "general",
-  });
+  const [loading, setLoading] = useState(false);
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [submitStatus, setSubmitStatus] = useState<
-    "idle" | "success" | "error"
-  >("idle");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ContactFormData>();
 
-  const handleInputChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    // Simulate form submission
+  async function onSubmit(data: ContactFormData) {
+    setLoading(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      setSubmitStatus("success");
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        subject: "",
-        message: "",
-        caseType: "general",
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/contact`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
       });
-    } catch (error) {
-      setSubmitStatus("error");
+
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.message || "Failed to send message");
+      }
+
+      reset();
+      alert("✅ Message sent successfully! We'll get back to you soon.");
+    } catch (err: any) {
+      alert(`❌ ${err.message || "Something went wrong, please try again."}`);
     } finally {
-      setIsSubmitting(false);
-      setTimeout(() => setSubmitStatus("idle"), 5000);
+      setLoading(false);
     }
-  };
-
-  const contactMethods = [
-    {
-      icon: <FaPhoneAlt className="w-6 h-6" />,
-      title: "Phone",
-      details: "+91 9876543210",
-      description: "Sun-Fri from 10am to 6pm",
-    },
-    {
-      icon: <TfiEmail className="w-6 h-6" />,
-      title: "Email",
-      details: "contact@muralilawfirm.com",
-      description: "We respond within 24 hours",
-    },
-    {
-      icon: <IoLocation className="w-6 h-6" />,
-      title: "Office",
-      details: "Annamnagar, Kathmandu",
-      description: "Nepal",
-    },
-    {
-      icon: <MdAccessTime className="w-6 h-6" />,
-      title: "Working Hours",
-      details: "Monday - Friday",
-      description: "9:00 AM - 6:00 PM IST",
-    },
-  ];
-
-  const caseTypes = [
-    { value: "general", label: "General Inquiry" },
-    { value: "property", label: "Property Law" },
-    { value: "family", label: "Family Law" },
-    { value: "criminal", label: "Criminal Defense" },
-    { value: "corporate", label: "Corporate Law" },
-    { value: "ip", label: "Intellectual Property" },
-    { value: "other", label: "Other Legal Matter" },
-  ];
+  }
 
   return (
-    <div className="min-h-screen bg-green-100">
-      {/* Header */}
+    <div className="min-h-screen bg-gray-50 flex flex-col">
+      {/* HEADER */}
+      <motion.header
+        className="bg-blue-500 text-white text-center py-10 px-4 mt-5"
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0, transition: { duration: 0.6 } }}
+      >
+        <h1 className="text-3xl md:text-4xl font-bold">Contact Us</h1>
+        <p className="text-blue-100 mt-2">
+          Fill out the form below or find us on the map. We’ll respond quickly.
+        </p>
+      </motion.header>
 
-      <div className="container mx-auto px-4 py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Contact Form */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Send us a Message
-            </h2>
+      {/* CONTENT */}
+      <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 p-6 w-full flex-1 mt-7">
+        {/* CONTACT FORM */}
+        <motion.div
+          className="bg-white shadow-md rounded-2xl p-6 cursor-pointer"
+          whileHover={sectionHover}
+          initial="hidden"
+          animate="visible"
+        >
+          <motion.h2
+            className="text-2xl font-semibold mb-4"
+            custom={1}
+            variants={formVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            Send Us a Message
+          </motion.h2>
 
-            {submitStatus === "success" && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md mb-6">
-                Thank you for your message! We'll get back to you within 24
-                hours.
-              </div>
-            )}
-
-            {submitStatus === "error" && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md mb-6">
-                There was an error sending your message. Please try again or
-                contact us directly.
-              </div>
-            )}
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="name"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    id="name"
-                    name="name"
-                    required
-                    value={formData.name}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Your full name"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="email"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    required
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="your.email@example.com"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label
-                    htmlFor="phone"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="+91 1234567890"
-                  />
-                </div>
-                <div>
-                  <label
-                    htmlFor="caseType"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Case Type
-                  </label>
-                  <select
-                    id="caseType"
-                    name="caseType"
-                    value={formData.caseType}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {caseTypes.map((type) => (
-                      <option key={type.value} value={type.value}>
-                        {type.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              <div>
-                <label
-                  htmlFor="subject"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  name="subject"
-                  required
-                  value={formData.subject}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Brief subject of your inquiry"
-                />
-              </div>
-
-              <div>
-                <label
-                  htmlFor="message"
-                  className="block text-sm font-medium text-gray-700 mb-1"
-                >
-                  Message *
-                </label>
-                <textarea
-                  id="message"
-                  name="message"
-                  required
-                  rows={5}
-                  value={formData.message}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Please describe your legal matter in detail..."
-                />
-              </div>
-
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-amber-600 text-white py-3 px-4 rounded-md hover:bg-blue-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            {["name", "email", "number", "message"].map((field, index) => (
+              <motion.div
+                key={field}
+                custom={index + 2}
+                variants={formVariants}
+                initial="hidden"
+                animate="visible"
               >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center">
-                    <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                    Sending...
-                  </div>
-                ) : (
-                  "Send Message"
-                )}
-              </button>
-
-              <p className="text-sm text-gray-600 text-center">
-                By submitting this form, you agree to our privacy policy and
-                terms of service.
-              </p>
-            </form>
-          </div>
-
-          {/* Office Location & Map */}
-          <div>
-            <div className="bg-white rounded-lg shadow-sm p-4  mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                Our Office
-              </h2>
-              <div className="aspect-w-16 aspect-h-9 bg-gray-200 rounded-lg mb-4">
-                {/* Placeholder for map - replace with actual map component */}
-                <div className="w-full h-64 bg-gray-300 rounded-lg flex items-center justify-center">
-                  <div className="text-center text-gray-600">
-                   <iframe
-    className="h-64 w-118 rounded-lg"
-    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.647538566965!2d85.32707092405266!3d27.69728652593773!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19a364bb5935%3A0xf40b4cf2c78cf48a!2sAnamnagar%2C%20Kathmandu%2044600!5e0!3m2!1sen!2snp!4v1756716940130!5m2!1sen!2snp" 
-   
-  ></iframe>
-                  </div>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <p className="font-semibold">Murali Dhar Mishra Law Firm</p>
-                <p className="text-gray-600">
-                  123 Legal Avenue, Connaught Place
-                </p>
-                <p className="text-gray-600">Annamnagar, Kathmandu</p>
-                <p className="text-gray-600">Nepal</p>
-              </div>
-            </div>
-
-            {/* Emergency Contact */}
-            <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-red-800 mb-3 flex items-center">
-                <svg
-                  className="w-5 h-5 mr-2"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                {field !== "message" ? (
+                  <input
+                    type={field === "email" ? "email" : field === "number" ? "tel" : "text"}
+                    placeholder={
+                      field === "number"
+                        ? "Phone Number"
+                        : `Your ${field.charAt(0).toUpperCase() + field.slice(1)}`
+                    }
+                    {...register(field as keyof ContactFormData, {
+                      required: `${field.charAt(0).toUpperCase() + field.slice(1)} is required`,
+                      pattern:
+                        field === "email"
+                          ? { value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/, message: "Invalid email address" }
+                          : field === "number"
+                          ? { value: /^[0-9]{7,15}$/, message: "Enter a valid phone number" }
+                          : undefined,
+                    })}
+                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
                   />
-                </svg>
-                Emergency Legal Assistance
-              </h3>
-              <p className="text-red-700 mb-3">
-                For urgent legal matters that require immediate attention
-                outside business hours:
-              </p>
-              <div className="bg-white rounded-md p-3">
-                <p className="font-semibold text-red-800">+977 1234 5678</p>
-                <p className="text-sm text-red-600">
-                  Available 24/7 for emergency legal situations
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Contact Methods */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12">
-          {contactMethods.map((method, index) => (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow-sm p-6 text-center hover:shadow-md transition-shadow"
+                ) : (
+                  <textarea
+                    placeholder="Your Message"
+                    rows={4}
+                    {...register("message", { required: "Message is required" })}
+                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none resize-none"
+                  />
+                )}
+                {errors[field as keyof ContactFormData] && (
+                  <p className="text-red-500 text-sm">{errors[field as keyof ContactFormData]?.message}</p>
+                )}
+              </motion.div>
+            ))}
+
+            <motion.button
+              type="submit"
+              disabled={loading}
+              custom={6}
+              variants={formVariants}
+              initial="hidden"
+              animate="visible"
+              className="w-full bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800 transition disabled:opacity-50"
             >
-              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <div className="text-blue-850">{method.icon}</div>
-              </div>
-              <h3 className="font-semibold text-gray-900 mb-2">
-                {method.title}
-              </h3>
-              <p className="text-blue-850 font-medium mb-1">{method.details}</p>
-              <p className="text-sm text-gray-600">{method.description}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+              {loading ? "Sending..." : "Send Message"}
+            </motion.button>
+          </form>
+        </motion.div>
+
+        {/* GOOGLE MAP */}
+        <motion.div
+          className="rounded-2xl overflow-hidden shadow-md cursor-pointer"
+          whileHover={sectionHover}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{ opacity: 1, x: 0, transition: { duration: 0.6 } }}
+        >
+          <iframe
+            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3544.878059883946!2d85.32862387723935!3d27.698331209127115!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x39eb19a408eb3551%3A0xc1019e38c80b8776!2sAle%20Law%20Firm!5e0!3m2!1sen!2snp!4v1757848002098!5m2!1sen!2snp"
+            className="w-full h-full min-h-[300px] md:min-h-[500px]"
+            loading="lazy"
+          ></iframe>
+        </motion.div>
+      </main>
     </div>
   );
 }

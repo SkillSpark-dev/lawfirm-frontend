@@ -1,48 +1,69 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Slider, { Settings } from "react-slick";
-import { testimonialsData } from "@/assets/mockdata";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
+
+interface Testimonial {
+  _id: string;
+  clientName: string;
+  clientProfession: string;
+  feedback: string;
+  clientImage?: { url: string };
+}
+
 const TestimonialSlider = () => {
+  const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
+
   const settings: Settings = {
-    dots: false,
+    dots: true,
     infinite: true,
     speed: 800,
     slidesToShow: 1,
     slidesToScroll: 1,
     autoplay: true,
     autoplaySpeed: 3000,
-    customPaging: () => (
-      <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-    ),
-    
+    customPaging: () => <div className="w-2 h-2 bg-gray-400 rounded-full"></div>,
   };
 
+  useEffect(() => {
+    const fetchTestimonials = async () => {
+      try {
+        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/testimonial`);
+        const data = await res.json();
+        if (res.ok && data.data) setTestimonials(data.data);
+      } catch (err) {
+        console.error("Failed to fetch testimonials:", err);
+      }
+    };
+    fetchTestimonials();
+  }, []);
+
   return (
-    <div className="w-70 bg-white rounded-lg shadow p-4 flex flex-col justify-center h-80">
-      <Slider {...settings}>
-        {testimonialsData.map((item) => (
-          <div
-            key={item.id}
-            className="flex flex-col items-center text-center px-4"
-          >
-            <img
-              src={item.image}
-              alt={item.name}
-              className="h-16 w-16 rounded-full object-cover border mb-3"
-            />
-            <p className="italic text-gray-900 text-sm mb-2">
-              "{item.feedback}"
-            </p>
-            <div className="text-sm text-black">
-              <p className="font-semibold">{item.name}</p>
-              <p className="text-gray-700">{item.role}</p>
+    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow p-4 flex flex-col justify-center h-80">
+      {testimonials.length === 0 ? (
+        <p className="text-center text-gray-500">No testimonials available</p>
+      ) : (
+        <Slider {...settings}>
+          {testimonials.map((item) => (
+            <div key={item._id} className="flex flex-col items-center text-center px-4">
+              {item.clientImage?.url && (
+                <img
+                  src={item.clientImage.url}
+                  alt={item.clientName}
+                  className="h-16 w-16 rounded-full object-cover border mb-3"
+                />
+              )}
+              <p className="italic text-gray-900 text-sm mb-2">"{item.feedback}"</p>
+              <div className="text-sm text-black">
+                <p className="font-semibold">{item.clientName}</p>
+                <p className="text-gray-700">{item.clientProfession}</p>
+              </div>
             </div>
-          </div>
-        ))}
-      </Slider>
+          ))}
+        </Slider>
+      )}
     </div>
   );
 };

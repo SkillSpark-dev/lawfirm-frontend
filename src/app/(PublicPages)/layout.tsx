@@ -8,11 +8,15 @@ interface Props {
 
 const MainLayout = ({ children }: Props) => {
   return (
-    <div>
+    <>
+    
+    <div style={{backgroundImage: "url('/theme.webp')" }}>
+   
       <Header />
       {children}
       <Footer />
     </div>
+    </>
   );
 };
 
