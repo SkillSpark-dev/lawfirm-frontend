@@ -15,14 +15,14 @@ import {
 const Hero = () => {
   const [isOpen, setIsOpen] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+ {/*} const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const data = Object.fromEntries(formData.entries());
     console.log("Appointment Data:", data);
     setIsOpen(false);
   };
-
+ */}
   return (
     <>
       <div>

@@ -41,8 +41,12 @@ export default function Signup() {
 
       setSuccess("Signup successful! Redirecting to login...");
       setTimeout(() => router.push("/login"), 2000);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong. Please try again.");
+      }
     } finally {
       setIsLoading(false);
     }

@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import React, { useEffect, useState } from "react";
 import Slider, { Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
@@ -46,22 +46,27 @@ const TestimonialSlider = () => {
         <p className="text-center text-gray-500">No testimonials available</p>
       ) : (
         <Slider {...settings}>
-          {testimonials.map((item) => (
-            <div key={item._id} className="flex flex-col items-center text-center px-4">
-              {item.clientImage?.url && (
-                <img
-                  src={item.clientImage.url}
-                  alt={item.clientName}
-                  className="h-16 w-16 rounded-full object-cover border mb-3"
-                />
-              )}
-              <p className="italic text-gray-900 text-sm mb-2">"{item.feedback}"</p>
-              <div className="text-sm text-black">
-                <p className="font-semibold">{item.clientName}</p>
-                <p className="text-gray-700">{item.clientProfession}</p>
-              </div>
-            </div>
-          ))}
+         {testimonials.map((item) => (
+  <div key={item._id} className="flex flex-col items-center text-center px-4">
+    {item.clientImage?.url && (
+      <div className="relative w-20 h-20 mb-3">
+  <Image
+    src={item.clientImage.url}
+    alt={item.clientName}
+    fill
+    className="rounded-full object-cover border"
+  />
+</div>
+
+    )}
+    <p className="italic text-gray-900 text-sm mb-2">&quot;{item.feedback}&quot;</p>
+    <div className="text-sm text-black">
+      <p className="font-semibold">{item.clientName}</p>
+      <p className="text-gray-700">{item.clientProfession}</p>
+    </div>
+  </div>
+))}
+
         </Slider>
       )}
     </div>

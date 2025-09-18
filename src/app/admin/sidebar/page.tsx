@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -21,7 +21,6 @@ interface NavItem {
 }
 
 const navLinks: NavItem[] = [
-  
   { href: "/admin/home", label: "Home", icon: <RiDashboardLine size={20} /> },
   { href: "/admin/about", label: "About", icon: <RiDashboardLine size={20} /> },
   { href: "/admin/aboutsection", label: "About Section", icon: <RiDashboardLine size={20} /> },
@@ -29,9 +28,7 @@ const navLinks: NavItem[] = [
   { href: "/admin/team", label: "Team", icon: <RiTeamLine size={20} /> },
   { href: "/admin/services", label: "Services", icon: <RiMoneyDollarCircleLine size={20} /> },
   { href: "/admin/contact", label: "Contact", icon: <RiFileListLine size={20} /> },
-  {href: "/admin/testimonial", label: "Testimonial", icon: <ImImages size={20} />},
-  
-  
+  { href: "/admin/testimonial", label: "Testimonial", icon: <ImImages size={20} /> },
 ];
 
 export default function Sidebar() {
@@ -39,7 +36,6 @@ export default function Sidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
-  // Handle window resize for auto-collapse
   useEffect(() => {
     const handleResize = () => {
       setCollapsed(window.innerWidth < 1024);
@@ -51,11 +47,8 @@ export default function Sidebar() {
   }, []);
 
   const toggleSidebar = () => {
-    if (window.innerWidth >= 1024) {
-      setCollapsed((prev) => !prev);
-    } else {
-      setMobileOpen((prev) => !prev);
-    }
+    if (window.innerWidth >= 1024) setCollapsed((prev) => !prev);
+    else setMobileOpen((prev) => !prev);
   };
 
   const closeMobileSidebar = () => {
@@ -85,8 +78,13 @@ export default function Sidebar() {
         <div className="flex items-center justify-between p-4 border-b border-blue-700 bg-cyan-950">
           {!collapsed && (
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded flex items-center justify-center overflow-hidden ">
-                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+              <div className="relative w-8 h-8 rounded overflow-hidden">
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  fill
+                  className="object-contain"
+                />
               </div>
               <span className="font-semibold text-sm sm:text-base">Murali Dhar Mishra</span>
             </div>

@@ -1,6 +1,6 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useState, useEffect, useCallback } from "react";
 import { useForm, useFieldArray } from "react-hook-form";
 
 interface AboutStat {
@@ -36,11 +36,9 @@ export default function AdminAboutPage() {
   });
 
   // Fetch About Data
-  useEffect(() => {
-    fetchAbout();
-  }, []);
+  
 
-  const fetchAbout = async () => {
+  const fetchAbout = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
@@ -59,7 +57,12 @@ export default function AdminAboutPage() {
     } finally {
       setLoading(false);
     }
-  };
+  },[reset]);
+
+
+  useEffect(() => {
+    fetchAbout();
+  }, [fetchAbout]);
 
   const handleHeroFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedHeroFile(e.target.files?.[0] || null);
@@ -136,19 +139,41 @@ export default function AdminAboutPage() {
             <label className="block mb-1 font-medium">Subtitle</label>
             <textarea {...register("subtitle", { required: true })} className="w-full border rounded p-2" />
           </div>
-          <div>
-            <label className="block mb-1 font-medium">Hero Image</label>
-            {selectedHeroFile ? (
-              <img
-                src={URL.createObjectURL(selectedHeroFile)}
-                alt="Preview"
-                className="mb-2 w-full max-w-sm rounded"
-              />
-            ) : about?.image?.url ? (
-              <img src={about.image.url} alt="Current Hero" className="mb-2 w-full max-w-sm rounded" />
-            ) : null}
-            <input type="file" onChange={handleHeroFileChange} className="w-full border rounded p-2" />
-          </div>
+         <div>
+  <label className="block mb-1 font-medium">Hero Image</label>
+
+  {/* Preview selected file */}
+  {selectedHeroFile && (
+    <div className="relative w-full h-64 max-w-sm mb-2">
+      <Image
+        src={URL.createObjectURL(selectedHeroFile)}
+        alt="Preview"
+        fill
+        className="object-cover rounded"
+      />
+    </div>
+  )}
+
+  {/* Show current image if no new file is selected */}
+  {!selectedHeroFile && about?.image?.url && (
+    <div className="relative w-full h-64 max-w-sm mb-2">
+      <Image
+        src={about.image.url}
+        alt="Current Hero"
+        fill
+        className="object-cover rounded"
+      />
+    </div>
+  )}
+
+  <input
+    type="file"
+    accept="image/*"
+    onChange={handleHeroFileChange}
+    className="w-full border rounded p-2"
+  />
+</div>
+
         </section>
 
         {/* Stats Section */}

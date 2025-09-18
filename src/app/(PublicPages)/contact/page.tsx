@@ -37,9 +37,13 @@ export default function ContactPage() {
       }
 
       reset();
-      alert("✅ Message sent successfully! We'll get back to you soon.");
-    } catch (err: any) {
-      alert(`❌ ${err.message || "Something went wrong, please try again."}`);
+      alert("Message sent successfully! We'll get back to you soon.");
+    } catch (err: unknown) {
+    if(err instanceof Error){
+      alert(`Error: ${err.message}`);
+    }else{
+      alert("Something went wrong, please try again.");
+    }
     } finally {
       setLoading(false);
     }

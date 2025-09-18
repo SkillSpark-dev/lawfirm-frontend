@@ -10,6 +10,10 @@ interface Contact {
   createdAt: string;
 }
 
+interface ContactResponse {
+  data: Contact[];
+}
+
 export default function AdminContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
@@ -27,10 +31,14 @@ export default function AdminContactsPage() {
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/contact`);
       if (!res.ok) throw new Error("Failed to fetch contacts");
-      const data = await res.json();
+      const data: ContactResponse = await res.json();
       setContacts(data.data || []);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Something went wrong");
+      }
     } finally {
       setLoading(false);
     }
@@ -45,8 +53,12 @@ export default function AdminContactsPage() {
       });
       if (!res.ok) throw new Error("Failed to delete contact");
       fetchContacts(); // refresh list
-    } catch (err: any) {
-      setError(err.message || "Failed to delete contact");
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError("Failed to delete contact");
+      }
     } finally {
       setSaving(false);
     }

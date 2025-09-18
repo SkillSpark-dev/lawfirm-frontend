@@ -5,15 +5,6 @@ import { RxHamburgerMenu } from "react-icons/rx";
 import { headerData } from "../assets/mockdata";
 import Image from "next/image";
 
-interface HeaderProps {
-  data: {
-    title: string;
-    logo?: string;
-    navLinks?: { label: string; href: string }[];
-    contact?: { phone: string; email: string };
-  };
-}
-
 function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -26,7 +17,9 @@ function Header() {
         {/* Logo + Title */}
         <div className="flex items-center gap-3">
           {headerData.logo && (
-            <img src="/logo.png" alt="Logo" className="h-8" />
+            <div className="relative w-8 h-8">
+    <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+  </div>
           )}
           <h1 className="text-sm  md:text-lg font-bold">{headerData.title}</h1>
         </div>

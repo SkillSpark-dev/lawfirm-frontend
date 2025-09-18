@@ -1,13 +1,30 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 
 interface ServiceDetailPageProps {
   params: Promise<{ id: string }>; // ✅ Make params async
 }
 
-export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {
-  const { id } = await params; // ✅ Await params before using
+interface ServiceDetail {
+  _id: string;
+  title: string;
+  description: string;
+  keyServices?: string[];
+}
 
-  // ✅ Fetch service by ID from backend
+interface Service {
+  serviceCardTitle?: string;
+  category: string;
+  serviceCardDescription?: string;
+  description?: string;
+  image?: { url: string };
+  serviceCardFeatures?: string[];
+  details?: ServiceDetail[];
+}
+
+export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {
+  const { id } = await params;
+
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/v1/services/${id}`,
     { cache: "no-store" }
@@ -18,7 +35,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
   }
 
   const data = await res.json();
-  const service = data?.data;
+  const service: Service = data?.data;
 
   if (!service) {
     notFound();
@@ -38,46 +55,48 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
 
       {/* Image */}
       {service.image?.url && (
-        <img
+        <Image
           src={service.image.url}
           alt={service.category}
           className="w-full rounded-xl shadow mb-6"
+          width={800}
+          height={500}
         />
       )}
 
       {/* Features */}
-      {service.serviceCardFeatures?.length > 0 && (
+      {service.serviceCardFeatures?.length ? (
         <div className="mb-8">
           <h2 className="text-2xl font-semibold mb-2">Key Features</h2>
           <ul className="list-disc list-inside space-y-1 text-gray-600">
-            {service.serviceCardFeatures.map((feature: string, idx: number) => (
+            {service.serviceCardFeatures.map((feature, idx) => (
               <li key={idx}>{feature}</li>
             ))}
           </ul>
         </div>
-      )}
+      ) : null}
 
       {/* Details */}
-      {service.details?.length > 0 && (
+      {service.details?.length ? (
         <div className="space-y-6">
-          {service.details.map((detail: any) => (
+          {service.details.map((detail: ServiceDetail) => (
             <div key={detail._id} className="p-6 bg-gray-50 rounded-xl shadow-sm">
               <h2 className="text-xl sm:text-2xl font-semibold mb-2">
                 {detail.title}
               </h2>
               <p className="text-gray-600 mb-3">{detail.description}</p>
 
-              {detail.keyServices?.length > 0 && (
+              {detail.keyServices?.length ? (
                 <ul className="list-disc list-inside space-y-1 text-gray-600">
-                  {detail.keyServices.map((point: string, idx: number) => (
+                  {detail.keyServices.map((point, idx) => (
                     <li key={idx}>{point}</li>
                   ))}
                 </ul>
-              )}
+              ) : null}
             </div>
           ))}
         </div>
-      )}
+      ) : null}
     </div>
   );
 }

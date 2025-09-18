@@ -1,10 +1,10 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { FaLinkedin, FaFacebook } from "react-icons/fa";
 
-interface SocialLinks {
+ interface SocialLinks {
   linkedin?: string;
   facebook?: string;
 }
@@ -42,26 +42,25 @@ export default function AdminTeamPage() {
     },
   });
 
-  useEffect(() => {
-    fetchTeam();
-  }, []);
-
-  /** Fetch Team Members */
-  async function fetchTeam() {
-    if (!token) return;
-    setLoading(true);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      setTeam(data.data || []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
+ const fetchTeam = useCallback(async () => {
+  if (!token) return;
+  setLoading(true);
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    setTeam(data.data || []);
+  } catch (err) {
+    console.error(err);
+  } finally {
+    setLoading(false);
   }
+}, [token]);
+
+useEffect(() => {
+  fetchTeam();
+}, [fetchTeam]);
 
   /** Handle Image Preview */
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -196,7 +195,10 @@ export default function AdminTeamPage() {
           <input type="file" accept="image/*" onChange={handleImageChange} className="w-full border rounded p-2" />
           {preview && (
             <div className="flex items-center gap-2 mt-2">
-              <img src={preview} alt="Preview" className="w-24 h-24 object-cover rounded" />
+              <div className="w-24 h-24 relative">
+                <Image src={preview} alt="Preview" fill className="object-cover rounded" />
+              </div>
+              
               <button type="button" onClick={() => { setPreview(null); setSelectedFile(null); }} className="text-red-500">
                 Remove
               </button>
@@ -240,7 +242,9 @@ export default function AdminTeamPage() {
           team.map((m) => (
             <div key={m._id} className="bg-white shadow rounded-lg p-4 flex flex-col items-center space-y-2">
               {m.image?.url ? (
-                <img src={m.image.url} alt={m.name} className="w-24 h-24 object-cover rounded-full" />
+                <div className="w-24 h-24 relative">
+                <Image src={m.image.url} alt={m.name} fill className=" object-cover rounded-full" />
+                </div>
               ) : (
                 <div className="w-24 h-24 bg-gray-200 rounded-full" />
               )}

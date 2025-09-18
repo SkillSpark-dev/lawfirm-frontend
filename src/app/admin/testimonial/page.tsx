@@ -1,6 +1,6 @@
 "use client";
-
-import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useState, useEffect, useCallback } from "react";
 
 interface Testimonial {
   _id: string;
@@ -26,24 +26,27 @@ export default function AdminTestimonials() {
 
   const token = typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  // Fetch testimonials
-  const fetchTestimonials = async () => {
-    setLoading(true);
-    try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/testimonial`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      const data = await res.json();
-      if (res.ok) setTestimonials(data.data || []);
-      else setError(data.message || "Failed to fetch testimonials");
-    } catch {
-      setError("Something went wrong while fetching testimonials");
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  useEffect(() => { fetchTestimonials(); }, []);
+
+const fetchTestimonials = useCallback(async () => {
+  setLoading(true);
+  try {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/testimonial`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+    if (res.ok) setTestimonials(data.data || []);
+    else setError(data.message || "Failed to fetch testimonials");
+  } catch {
+    setError("Something went wrong while fetching testimonials");
+  } finally {
+    setLoading(false);
+  }
+}, [token]); // ✅ token is stable dependency
+
+useEffect(() => {
+  fetchTestimonials();
+}, [fetchTestimonials]); // ✅ safe now
 
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -148,7 +151,9 @@ export default function AdminTestimonials() {
           <input type="file" onChange={handleImageChange} className="w-full border rounded p-2" />
           {preview && (
             <div className="flex items-center gap-2 mt-2">
-              <img src={preview} alt="Preview" className="w-20 h-20 rounded-full object-cover" />
+              <div className="w-20 h-20 relative">
+              <Image src={preview} alt="Preview" className=" rounded-full object-cover" />
+              </div>
               <button type="button" className="text-red-500" onClick={() => { setPreview(null); setSelectedImage(null); }}>
                 Remove
               </button>
@@ -174,7 +179,7 @@ export default function AdminTestimonials() {
             testimonials.map((t) => (
               <div key={t._id} className="bg-white shadow rounded p-4 space-y-2">
                 <div className="flex items-center gap-4">
-                  {t.clientImage?.url ? <img src={t.clientImage.url} alt={t.clientName} className="w-16 h-16 rounded-full object-cover" /> : <div className="w-16 h-16 bg-gray-200 rounded-full" />}
+                  {t.clientImage?.url ? <Image src={t.clientImage.url} alt={t.clientName} width={128} height={128} className=" rounded-full object-cover" /> : <div className="w-16 h-16 bg-gray-200 rounded-full" />}
                   <div>
                     <h3 className="font-bold">{t.clientName}</h3>
                     <p className="text-sm text-gray-600">{t.clientProfession}</p>

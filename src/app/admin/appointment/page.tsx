@@ -10,6 +10,7 @@ interface AppointmentData {
   time: string;
 }
 
+
 const Page = () => {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -25,8 +26,9 @@ const Page = () => {
       if (!res.ok) throw new Error("Failed to fetch appointments");
       const data = await res.json();
       setAppointments(data.data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to fetch appointments");
     } finally {
       setLoading(false);
     }

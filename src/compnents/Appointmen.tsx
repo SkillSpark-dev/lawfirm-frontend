@@ -53,8 +53,9 @@ const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose }) => {
         setSuccess(null);
         onClose();
       }, 1500);
-    } catch (err: any) {
-      setError(err.message || "Something went wrong!");
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to book appointment");
     } finally {
       setLoading(false);
     }

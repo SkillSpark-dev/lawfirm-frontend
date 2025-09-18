@@ -1,12 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useState, useEffect, useCallback } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 
+// --- Types ---
 interface ServiceDetail {
   title: string;
   description: string;
-  keyServices: string[];
+  keyServices: string[]; // Must be string array
 }
 
 interface Service {
@@ -16,24 +20,35 @@ interface Service {
   serviceCardTitle: string;
   serviceCardDescription: string;
   serviceCardFeatures: string[];
-  image?: { url: string } | string | null;
+  image?: { url: string; public_id?: string } | null;
   details?: ServiceDetail[];
 }
 
-type ServiceFormInputs = {
-  category: string;
-  description: string;
-  serviceCardTitle: string;
-  serviceCardDescription: string;
-  serviceCardFeatures: string;
-  image: FileList;
-  details: {
-    title: string;
-    description: string;
-    keyServices: string;
-  }[];
-};
+// --- Zod Schema for Form ---
+const serviceSchema = z.object({
+  category: z.string().min(1, "Category is required"),
+  description: z.string().min(1, "Description is required"),
+  serviceCardTitle: z.string().min(1, "Card title is required"),
+  serviceCardDescription: z.string().min(1, "Card description is required"),
+  serviceCardFeatures: z.string().min(1, "At least one feature is required"),
+  image: z
+    .any()
+    .optional()
+    .refine((files) => !files || files.length <= 1, "You can upload only one image"),
+  details: z
+    .array(
+      z.object({
+        title: z.string(),
+        description: z.string(),
+        keyServices: z.string(),
+      })
+    )
+    .optional(),
+});
 
+type ServiceFormInputs = z.infer<typeof serviceSchema>;
+
+// --- Component ---
 export default function AdminServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -41,51 +56,87 @@ export default function AdminServicesPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  const { register, handleSubmit, reset, control, formState: { errors } } = useForm<ServiceFormInputs>({
-    defaultValues: { category: "", description: "", serviceCardTitle: "", serviceCardDescription: "", serviceCardFeatures: "", details: [] },
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<ServiceFormInputs>({
+    resolver: zodResolver(serviceSchema),
+    defaultValues: {
+      category: "",
+      description: "",
+      serviceCardTitle: "",
+      serviceCardDescription: "",
+      serviceCardFeatures: "",
+      details: [],
+    },
   });
 
-  const { fields, append, remove } = useFieldArray({ control, name: "details" });
+  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
-  const fetchServices = async () => {
+  // --- Fetch Services ---
+  const fetchServices = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/services`, {
+      const res = await fetch(`${API_BASE}/api/v1/services`, {
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
-      const data = await res.json();
+      const data: { data: Service[]; message: string } = await res.json();
       if (!res.ok) throw new Error(data.message || "Failed to fetch services");
       setServices(data.data);
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Unknown error");
     } finally {
       setLoading(false);
     }
-  };
+  }, [API_BASE]);
 
-  useEffect(() => { fetchServices(); }, []);
+  useEffect(() => {
+    fetchServices();
+  }, [fetchServices]);
 
-  const onSubmit = async (formData: ServiceFormInputs) => {
+  // --- Submit Handler ---
+  const onSubmit: SubmitHandler<ServiceFormInputs> = async (formData) => {
     setSaving(true);
     try {
       const token = localStorage.getItem("token");
       const body = new FormData();
+
       body.append("category", formData.category);
       body.append("description", formData.description);
       body.append("serviceCardTitle", formData.serviceCardTitle);
       body.append("serviceCardDescription", formData.serviceCardDescription);
-      body.append("serviceCardFeatures", JSON.stringify(formData.serviceCardFeatures.split(",").map(f => f.trim()).filter(Boolean)));
-      body.append("details", JSON.stringify(formData.details.map(d => ({
-        title: d.title,
-        description: d.description,
-        keyServices: d.keyServices.split(",").map(k => k.trim()).filter(Boolean),
-      }))));
+
+      body.append(
+        "serviceCardFeatures",
+        JSON.stringify(
+          formData.serviceCardFeatures.split(",").map((f) => f.trim()).filter(Boolean)
+        )
+      );
+
+      if (formData.details?.length) {
+        body.append(
+          "details",
+          JSON.stringify(
+            formData.details.map((d) => ({
+              title: d.title,
+              description: d.description,
+              keyServices: d.keyServices.split(",").map((k) => k.trim()).filter(Boolean),
+            }))
+          )
+        );
+      }
+
       if (formData.image?.[0]) body.append("image", formData.image[0]);
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/services${editingId ? `/${editingId}` : ""}`, {
-        method: editingId ? "PUT" : "POST",
+      const url = `${API_BASE}/api/v1/services${editingId ? `/${editingId}` : ""}`;
+      const method = editingId ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
         body,
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
@@ -96,13 +147,14 @@ export default function AdminServicesPage() {
       reset();
       setEditingId(null);
       fetchServices();
-    } catch (err: any) {
-      alert(`❌ Error: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`❌ Error: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setSaving(false);
     }
   };
 
+  // --- Edit Handler ---
   const handleEdit = (service: Service) => {
     setEditingId(service._id);
     reset({
@@ -111,21 +163,22 @@ export default function AdminServicesPage() {
       serviceCardTitle: service.serviceCardTitle,
       serviceCardDescription: service.serviceCardDescription,
       serviceCardFeatures: service.serviceCardFeatures.join(", "),
-      details: (service.details || []).map(d => ({
+      details: service.details?.map((d) => ({
         title: d.title,
         description: d.description,
-        keyServices: Array.isArray(d.keyServices) ? d.keyServices.join(", ") : "",
+        keyServices: d.keyServices.join(", "),
       })),
     });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  // --- Delete Handler ---
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this service?")) return;
     setSaving(true);
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/services/${id}`, {
+      const res = await fetch(`${API_BASE}/api/v1/services/${id}`, {
         method: "DELETE",
         headers: { Authorization: token ? `Bearer ${token}` : "" },
       });
@@ -133,8 +186,8 @@ export default function AdminServicesPage() {
       if (!res.ok) throw new Error(data.message || "Failed to delete service");
       alert("🗑️ Service deleted!");
       fetchServices();
-    } catch (err: any) {
-      alert(`❌ Error: ${err.message}`);
+    } catch (err: unknown) {
+      alert(`❌ Error: ${err instanceof Error ? err.message : "Unknown error"}`);
     } finally {
       setSaving(false);
     }
@@ -145,28 +198,54 @@ export default function AdminServicesPage() {
 
   return (
     <div className="p-8 max-w-6xl mx-auto relative">
-      {/* Overlay Spinner */}
       {(saving || loading) && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
           <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
         </div>
       )}
 
-      <h1 className="text-3xl font-bold mb-6">{editingId ? "✏️ Edit Service" : "➕ Add New Service"}</h1>
+      <h1 className="text-3xl font-bold mb-6">
+        {editingId ? "✏️ Edit Service" : "➕ Add New Service"}
+      </h1>
 
-      {/* Service Form */}
+      {/* Form */}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 bg-white p-6 rounded-xl shadow mb-8">
-        {/* ...form fields same as before... */}
+        <input {...register("category")} placeholder="Category" className="border p-2 rounded w-full" />
+        {errors.category && <p className="text-red-500 text-sm">{errors.category.message}</p>}
+
+        <input {...register("description")} placeholder="Description" className="border p-2 rounded w-full" />
+        {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
+
+        <input {...register("serviceCardTitle")} placeholder="Card Title" className="border p-2 rounded w-full" />
+        {errors.serviceCardTitle && <p className="text-red-500 text-sm">{errors.serviceCardTitle.message}</p>}
+
+        <input {...register("serviceCardDescription")} placeholder="Card Description" className="border p-2 rounded w-full" />
+        {errors.serviceCardDescription && <p className="text-red-500 text-sm">{errors.serviceCardDescription.message}</p>}
+
+        <input {...register("serviceCardFeatures")} placeholder="Features (comma separated)" className="border p-2 rounded w-full" />
+        {errors.serviceCardFeatures && <p className="text-red-500 text-sm">{errors.serviceCardFeatures.message}</p>}
+
+        <input type="file" {...register("image")} />
+
+        <button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">
+          {saving ? "Saving..." : editingId ? "Update" : "Create"}
+        </button>
       </form>
 
       {/* Existing Services */}
       <h2 className="text-xl font-semibold mb-4">Existing Services</h2>
       <div className="grid gap-4">
-        {services.map(service => (
+        {services.map((service) => (
           <div key={service._id} className="bg-white p-4 rounded-xl shadow flex justify-between items-center">
             <div className="flex items-center gap-4">
               {service.image && (
-                <img src={typeof service.image === "string" ? service.image : service.image.url} alt={service.serviceCardTitle} className="w-20 h-14 object-cover rounded" />
+                <Image
+                  src={typeof service.image === "string" ? service.image : service.image.url}
+                  alt={service.serviceCardTitle}
+                  className="w-20 h-14 object-cover rounded"
+                  width={80}
+                  height={56}
+                />
               )}
               <div>
                 <h3 className="text-lg font-bold">{service.serviceCardTitle}</h3>

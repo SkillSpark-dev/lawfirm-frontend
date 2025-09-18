@@ -23,6 +23,10 @@ interface Service {
   details?: ServiceDetail[];
 }
 
+interface ServicesApiResponse {
+  data: Service[];
+}
+
 export default function ServicesPage() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -34,13 +38,13 @@ export default function ServicesPage() {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/services`);
         if (!res.ok) throw new Error(`Server error ${res.status}`);
 
-        const data = await res.json();
+        const data: ServicesApiResponse = await res.json();
         if (!data.data || !Array.isArray(data.data)) throw new Error("Invalid backend data");
 
         setServices(data.data);
-      } catch (err: any) {
-        console.error(err);
-        setError(err.message || "Something went wrong");
+      } catch (err: unknown) {
+        if (err instanceof Error) setError(err.message);
+        else setError("Failed to fetch services");
       } finally {
         setLoading(false);
       }
@@ -49,8 +53,10 @@ export default function ServicesPage() {
     fetchServices();
   }, []);
 
-  if (loading) return <p className="p-8 text-center text-lg animate-pulse">⏳ Loading services...</p>;
-  if (error) return <p className="p-8 text-center text-red-600">❌ Failed to fetch services: {error}</p>;
+  if (loading)
+    return <p className="p-8 text-center text-lg animate-pulse">⏳ Loading services...</p>;
+  if (error)
+    return <p className="p-8 text-center text-red-600">❌ Failed to fetch services: {error}</p>;
 
   return (
     <div className="p-6 sm:p-8 max-w-7xl mx-auto">
@@ -69,7 +75,9 @@ export default function ServicesPage() {
           {services.map((service, index) => (
             <motion.div
               key={service._id}
-              className={`rounded-2xl shadow cursor-pointer overflow-hidden ${cardColors[index % cardColors.length]}`}
+              className={`rounded-2xl shadow cursor-pointer overflow-hidden ${
+                cardColors[index % cardColors.length]
+              }`}
               variants={cardVariants}
               initial="hidden"
               whileInView="visible"
@@ -87,28 +95,40 @@ export default function ServicesPage() {
                 </motion.div>
 
                 <div className="p-5 space-y-3">
-                  <motion.h2 className="text-xl font-semibold text-gray-800" variants={elementVariants[1]}>
+                  <motion.h2
+                    className="text-xl font-semibold text-gray-800"
+                    variants={elementVariants[1]}
+                  >
                     {service.serviceCardTitle || service.category}
                   </motion.h2>
 
-                  <motion.p className="text-gray-600 text-sm" variants={elementVariants[2]}>
+                  <motion.p
+                    className="text-gray-600 text-sm"
+                    variants={elementVariants[2]}
+                  >
                     {(service.serviceCardDescription || service.description)?.slice(0, 150)}...
                   </motion.p>
 
-                  {service.serviceCardFeatures?.length && (
-                    <motion.ul className="list-disc list-inside text-gray-700 text-sm" variants={elementVariants[3]}>
+                  {service.serviceCardFeatures?.length ? (
+                    <motion.ul
+                      className="list-disc list-inside text-gray-700 text-sm"
+                      variants={elementVariants[3]}
+                    >
                       {service.serviceCardFeatures.map((f, idx) => (
                         <li key={idx}>{f}</li>
                       ))}
                     </motion.ul>
-                  )}
+                  ) : null}
 
-                  {service.details?.length && (
-                    <motion.p className="text-xs text-gray-500 italic" variants={elementVariants[4]}>
+                  {service.details?.length ? (
+                    <motion.p
+                      className="text-xs text-gray-500 italic"
+                      variants={elementVariants[4]}
+                    >
                       Includes: {service.details[0].title}
                       {service.details.length > 1 && " + more"}
                     </motion.p>
-                  )}
+                  ) : null}
                 </div>
               </Link>
             </motion.div>

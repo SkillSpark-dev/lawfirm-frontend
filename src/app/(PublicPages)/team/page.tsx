@@ -21,6 +21,10 @@ interface TeamMember {
   socialLinks?: SocialLinks;
 }
 
+interface TeamApiResponse {
+  data: TeamMember[];
+}
+
 const TeamPage: React.FC = () => {
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,14 +35,17 @@ const TeamPage: React.FC = () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team`);
         if (!res.ok) throw new Error(`Server error ${res.status}`);
-        const data = await res.json();
 
-        if (!data.data || !Array.isArray(data.data)) throw new Error("Invalid data format from backend");
+        const data: TeamApiResponse = await res.json();
+        if (!data.data || !Array.isArray(data.data)) {
+          throw new Error("Invalid data format from backend");
+        }
 
         setTeam(data.data);
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error(err);
-        setError(err.message || "Failed to fetch team");
+        if (err instanceof Error) setError(err.message);
+        else setError("Failed to fetch team");
       } finally {
         setLoading(false);
       }
@@ -82,10 +89,7 @@ const TeamPage: React.FC = () => {
                   viewport={{ once: true, amount: 0.3 }}
                   className="flex flex-col justify-center items-center p-6 rounded-3xl shadow-lg text-center cursor-pointer"
                 >
-                  <motion.div
-                    className="w-32 h-32 mx-auto mb-4 relative"
-                    variants={imageVariants}
-                  >
+                  <motion.div className="w-32 h-32 mx-auto mb-4 relative" variants={imageVariants}>
                     <Image
                       src={imageSrc}
                       alt={member.name || "Team member"}
@@ -95,11 +99,7 @@ const TeamPage: React.FC = () => {
                     />
                   </motion.div>
 
-                  <motion.h3
-                    className="text-xl font-semibold"
-                    custom={0}
-                    variants={textVariants}
-                  >
+                  <motion.h3 className="text-xl font-semibold" custom={0} variants={textVariants}>
                     {member.name}
                   </motion.h3>
 

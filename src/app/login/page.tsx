@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -52,7 +52,7 @@ export default function Login() {
         {/* Logo + Title */}
         <div>
           <div className="flex justify-center">
-            <img
+            <Image
               src="/logo.png"
               alt="Logo"
               className="h-16 w-16 rounded-full object-cover"

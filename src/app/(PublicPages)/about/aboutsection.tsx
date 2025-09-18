@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import { useEffect, useState } from "react";
 import { motion} from "framer-motion";
 import { sectionVariants, buttonVariants } from "@/app/animation";
@@ -48,7 +48,7 @@ export default function AboutHeroPublicPage() {
     );
 
   const colors = ["bg-white", "bg-blue-50", "bg-red-50", "bg-green-50"];
-  const directions = ["x: -100", "x: 100", "y: -100", "y: 100"];
+  
 
   
   return (
@@ -67,10 +67,12 @@ export default function AboutHeroPublicPage() {
         >
           {section.image?.url && (
             <div className="md:w-1/2 h-64 md:h-auto flex-shrink-0">
-              <img
+              <Image
                 src={section.image.url}
                 alt={section.title}
-                className="w-full h-full object-cover"
+                width={500}
+                height={800}
+                className=" object-cover"
               />
             </div>
           )}

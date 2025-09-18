@@ -1,7 +1,7 @@
-// app/admin/home/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 
 export default function AdminHomePage() {
   const [headline, setHeadline] = useState("");
@@ -11,25 +11,31 @@ export default function AdminHomePage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
 
-  // Simulated read/fetch (read)
+  // Fetch initial data (simulated)
   useEffect(() => {
     const fetchData = async () => {
-      // Simulate API fetch
       const data = {
         headline: "Welcome to Our Law Firm",
         subHeadline: "Your trusted legal partner",
-        imageUrl: "/placeholder-home.jpg", // Example fallback
+        imageUrl: "/placeholder-home.jpg",
       };
-
       setHeadline(data.headline);
       setSubHeadline(data.subHeadline);
       setPreviewUrl(data.imageUrl);
     };
-
     fetchData();
   }, []);
 
-  // Create or update (save)
+  // Handle image upload
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImage(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  // Save data
   const handleSave = async () => {
     if (!headline.trim() || !subHeadline.trim()) {
       alert("Headline and subheadline are required.");
@@ -43,21 +49,10 @@ export default function AdminHomePage() {
       const formData = new FormData();
       formData.append("headline", headline);
       formData.append("subHeadline", subHeadline);
-      if (image) {
-        formData.append("image", image);
-      }
+      if (image) formData.append("image", image);
 
       // Simulate API call
-      console.log("Saving data:", {
-        headline,
-        subHeadline,
-        image,
-      });
-
-      // await fetch("/api/admin/home", {
-      //   method: "POST",
-      //   body: formData,
-      // });
+      console.log("Saving data:", { headline, subHeadline, image });
 
       setSaveMessage("Changes saved successfully!");
     } catch (error) {
@@ -68,22 +63,13 @@ export default function AdminHomePage() {
     }
   };
 
-  // Delete content (reset)
+  // Reset/Delete
   const handleDelete = () => {
     setHeadline("");
     setSubHeadline("");
     setImage(null);
     setPreviewUrl(null);
     setSaveMessage("Content reset.");
-  };
-
-  // Handle image upload
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImage(file);
-      setPreviewUrl(URL.createObjectURL(file));
-    }
   };
 
   return (
@@ -93,7 +79,7 @@ export default function AdminHomePage() {
       </h1>
 
       <div className="bg-white rounded-xl shadow p-6 space-y-6">
-        {/* Headline Input */}
+        {/* Headline */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Headline
@@ -106,7 +92,7 @@ export default function AdminHomePage() {
           />
         </div>
 
-        {/* Sub Headline Input */}
+        {/* SubHeadline */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Sub Headline
@@ -119,7 +105,7 @@ export default function AdminHomePage() {
           />
         </div>
 
-        {/* Image Upload */}
+        {/* Image Upload & Preview */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Homepage Image
@@ -130,12 +116,17 @@ export default function AdminHomePage() {
             onChange={handleImageChange}
             className="block w-full text-sm text-gray-500"
           />
+
           {previewUrl && (
-            <img
-              src={previewUrl}
-              alt="Preview"
-              className="mt-3 w-full h-48 object-cover rounded-lg shadow"
-            />
+            <div className="relative w-full h-64 mt-3 rounded-lg shadow overflow-hidden">
+              <Image
+                src={previewUrl}
+                alt="Homepage Preview"
+                fill
+                style={{ objectFit: "cover" }}
+                priority
+              />
+            </div>
           )}
         </div>
 
@@ -150,7 +141,6 @@ export default function AdminHomePage() {
           >
             {isSaving ? "Saving..." : "Save Changes"}
           </button>
-
           <button
             onClick={handleDelete}
             className="px-4 py-2 rounded-lg border border-red-500 text-red-600 hover:bg-red-50 transition"
@@ -160,9 +150,7 @@ export default function AdminHomePage() {
         </div>
 
         {/* Message */}
-        {saveMessage && (
-          <p className="text-sm text-green-600">{saveMessage}</p>
-        )}
+        {saveMessage && <p className="text-sm text-green-600">{saveMessage}</p>}
       </div>
     </div>
   );
