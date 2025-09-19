@@ -43,7 +43,7 @@ const Footer = () => {
           <h3 className="text-lg font-semibold text-white mb-4">Contact</h3>
           <p className="text-sm">kathmandu 44600 , Nepal</p>
           <p className="text-sm">Phone: +977-9843372744, 9818582345</p>
-          <p className="text-sm">Email: muralidharmishralawfirm@lawfirm.com</p>
+          <p className="text-sm">Email: mdmishralawfirm@gmail.com</p>
 
           {/* Social Icons */}
           <div className="flex gap-4 mt-4">

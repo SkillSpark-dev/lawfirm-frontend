@@ -11,7 +11,7 @@ export const headerData = {
   ],
   contact: {
     phone: "+977-9843372744 , 9818582345",
-    email: " muralidharmishralawfirm@gmail.com"
+    email: " mdmishralawfirm@gmail.com"
   }
 }
 
