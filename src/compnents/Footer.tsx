@@ -41,9 +41,9 @@ const Footer = () => {
         {/* Contact Info */}
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">Contact</h3>
-          <p className="text-sm">123 Main Street, Kathmandu</p>
-          <p className="text-sm">Phone: +977-9876543210</p>
-          <p className="text-sm">Email: info@lawfirm.com</p>
+          <p className="text-sm">kathmandu 44600 , Nepal</p>
+          <p className="text-sm">Phone: +977-9843372744, 9818582345</p>
+          <p className="text-sm">Email: muralidharmishralawfirm@lawfirm.com</p>
 
           {/* Social Icons */}
           <div className="flex gap-4 mt-4">
@@ -57,7 +57,7 @@ const Footer = () => {
 
       {/* Bottom */}
       <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm">
-        © {new Date().getFullYear()} LawFirm. All rights reserved.
+        © {new Date().getFullYear()} Technospire. All rights reserved.
       </div>
     </footer>
   );
