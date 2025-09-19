@@ -55,7 +55,7 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom */}
+      {/* Copyright */}
       <div className="border-t border-gray-700 mt-10 pt-6 text-center text-sm">
         © {new Date().getFullYear()} Tecnospire. All rights reserved.
       </div>
