@@ -13,6 +13,7 @@ interface ContactFormData {
 }
 
 export default function ContactPage() {
+   const API_BASE="https://lawservicesbackend.onrender.com"
   const [loading, setLoading] = useState(false);
 
   const {
@@ -25,7 +26,8 @@ export default function ContactPage() {
   async function onSubmit(data: ContactFormData) {
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/contact`, {
+     
+      const res = await fetch(`${API_BASE}/api/v1/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(data),

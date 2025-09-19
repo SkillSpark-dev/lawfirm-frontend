@@ -23,10 +23,11 @@ interface Service {
 }
 
 export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const { id } = await params;
 
   const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/v1/services/${id}`,
+    `${API_BASE}/api/v1/services/${id}`,
     { cache: "no-store" }
   );
 

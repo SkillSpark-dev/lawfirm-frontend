@@ -1,7 +1,8 @@
 "use client";
+
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, Control, UseFormRegister } from "react-hook-form";
 
 interface AboutStat {
   label: string;
@@ -16,7 +17,81 @@ interface AboutData {
   stats: AboutStat[];
 }
 
+// ✅ Hero Image Preview
+const HeroImagePreview: React.FC<{
+  selectedFile: File | null;
+  currentUrl?: string;
+}> = ({ selectedFile, currentUrl }) => {
+  if (selectedFile) {
+    return (
+      <div className="relative w-full h-64 max-w-sm mb-2">
+        <Image
+          src={URL.createObjectURL(selectedFile)}
+          alt="Preview"
+          fill
+          className="object-cover rounded"
+        />
+      </div>
+    );
+  }
+  if (currentUrl) {
+    return (
+      <div className="relative w-full h-64 max-w-sm mb-2">
+        <Image
+          src={currentUrl}
+          alt="Current Hero"
+          fill
+          className="object-cover rounded"
+        />
+      </div>
+    );
+  }
+  return null;
+};
+
+// ✅ Stats Section Component
+const StatsSection: React.FC<{
+  control: Control<AboutData>;
+  register: UseFormRegister<AboutData>;
+  statFields: { id: string }[];
+  appendStat: (stat: AboutStat) => void;
+  removeStat: (index: number) => void;
+}> = ({ register, statFields, appendStat, removeStat }) => (
+  <section>
+    <h2 className="text-lg font-semibold mb-2">Stats</h2>
+    {statFields.map((s, i) => (
+      <div key={s.id} className="flex gap-2 mb-2">
+        <input
+          {...register(`stats.${i}.label` as const)}
+          placeholder="Label"
+          className="border rounded p-2 flex-1"
+        />
+        <input
+          {...register(`stats.${i}.value` as const)}
+          placeholder="Value"
+          className="border rounded p-2 flex-1"
+        />
+        <button
+          type="button"
+          onClick={() => removeStat(i)}
+          className="bg-red-600 text-white px-2 rounded"
+        >
+          ✕
+        </button>
+      </div>
+    ))}
+    <button
+      type="button"
+      onClick={() => appendStat({ label: "", value: "" })}
+      className="bg-green-600 text-white px-4 py-1 rounded"
+    >
+      + Add Stat
+    </button>
+  </section>
+);
+
 export default function AdminAboutPage() {
+  const API_BASE = "https://lawservicesbackend.onrender.com";
   const [about, setAbout] = useState<AboutData | null>(null);
   const [selectedHeroFile, setSelectedHeroFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -35,58 +110,62 @@ export default function AdminAboutPage() {
     name: "stats",
   });
 
-  // Fetch About Data
-  
-
+  // ✅ Fetch About Data
   const fetchAbout = useCallback(async () => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/about`, {
+      if (!token) return;
+
+      const res = await fetch(`${API_BASE}/api/v1/about`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
+
       if (res.ok && data.data) {
         setAbout(data.data);
-        reset(data.data);
+        reset({
+          title: data.data.title || "",
+          subtitle: data.data.subtitle || "",
+          stats: Array.isArray(data.data.stats) ? data.data.stats : [{ label: "", value: "" }],
+          image: data.data.image || { url: "", public_id: "" },
+        });
+        setSelectedHeroFile(null);
       } else {
-        console.error("Failed to fetch about:", data.message);
+        console.error("Failed to fetch About:", data.message);
       }
     } catch (err) {
       console.error("Error fetching About:", err);
     } finally {
       setLoading(false);
     }
-  },[reset]);
-
+  }, [reset]);
 
   useEffect(() => {
     fetchAbout();
   }, [fetchAbout]);
 
+  // ✅ File Change
   const handleHeroFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSelectedHeroFile(e.target.files?.[0] || null);
   };
 
+  // ✅ Submit (Create / Update)
   const onSubmit = async (data: AboutData) => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token");
       const formData = new FormData();
-
       formData.append("title", data.title);
       formData.append("subtitle", data.subtitle);
+      formData.append("stats", JSON.stringify(data.stats));
       if (selectedHeroFile) formData.append("image", selectedHeroFile);
 
-      data.stats.forEach((stat, i) => {
-        formData.append(`stats[${i}][label]`, stat.label);
-        formData.append(`stats[${i}][value]`, stat.value);
-      });
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Unauthorized");
 
       const url = about?._id
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/about/${about._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/about`;
-
+        ? `${API_BASE}/api/v1/about/${about._id}`
+        : `${API_BASE}/api/v1/about`;
       const method = about?._id ? "PATCH" : "POST";
 
       const res = await fetch(url, {
@@ -95,14 +174,14 @@ export default function AdminAboutPage() {
         body: formData,
       });
 
-      if (!res.ok) throw new Error(await res.text());
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.message || "Failed to save About");
 
       await fetchAbout();
       setSelectedHeroFile(null);
-      alert("About page saved successfully!");
+      alert("✅ About page saved successfully!");
     } catch (err) {
-      console.error(err);
-      alert("Error saving About page. Check console for details.");
+      console.error("Error saving About:", err);
     } finally {
       setLoading(false);
     }
@@ -110,7 +189,6 @@ export default function AdminAboutPage() {
 
   return (
     <div className="relative p-6 bg-gray-50 min-h-screen space-y-6">
-      {/* Loading Overlay */}
       {loading && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
           <div className="flex flex-col items-center gap-3">
@@ -120,15 +198,10 @@ export default function AdminAboutPage() {
         </div>
       )}
 
-      <h1 className="text-2xl font-bold text-center sm:text-left mb-6">
-        Admin About Page
-      </h1>
+      <h1 className="text-2xl font-bold text-center sm:text-left mb-6">Admin About Page</h1>
 
-      <form
-        onSubmit={handleSubmit(onSubmit)}
-        className="bg-white shadow rounded-lg p-6 space-y-6"
-      >
-        {/* Hero Section */}
+      <form onSubmit={handleSubmit(onSubmit)} className="bg-white shadow rounded-lg p-6 space-y-6">
+        {/* ✅ Hero Section */}
         <section>
           <h2 className="text-lg font-semibold mb-2">Hero Section</h2>
           <div className="mb-4">
@@ -139,81 +212,28 @@ export default function AdminAboutPage() {
             <label className="block mb-1 font-medium">Subtitle</label>
             <textarea {...register("subtitle", { required: true })} className="w-full border rounded p-2" />
           </div>
-         <div>
-  <label className="block mb-1 font-medium">Hero Image</label>
 
-  {/* Preview selected file */}
-  {selectedHeroFile && (
-    <div className="relative w-full h-64 max-w-sm mb-2">
-      <Image
-        src={URL.createObjectURL(selectedHeroFile)}
-        alt="Preview"
-        fill
-        className="object-cover rounded"
-      />
-    </div>
-  )}
-
-  {/* Show current image if no new file is selected */}
-  {!selectedHeroFile && about?.image?.url && (
-    <div className="relative w-full h-64 max-w-sm mb-2">
-      <Image
-        src={about.image.url}
-        alt="Current Hero"
-        fill
-        className="object-cover rounded"
-      />
-    </div>
-  )}
-
-  <input
-    type="file"
-    accept="image/*"
-    onChange={handleHeroFileChange}
-    className="w-full border rounded p-2"
-  />
-</div>
-
+          <div>
+            <label className="block mb-1 font-medium">Hero Image</label>
+            <HeroImagePreview selectedFile={selectedHeroFile} currentUrl={about?.image?.url} />
+            <input type="file" accept="image/*" onChange={handleHeroFileChange} className="w-full border rounded p-2" />
+          </div>
         </section>
 
-        {/* Stats Section */}
-        <section>
-          <h2 className="text-lg font-semibold mb-2">Stats</h2>
-          {statFields.map((s, i) => (
-            <div key={s.id} className="flex gap-2 mb-2">
-              <input
-                {...register(`stats.${i}.label`)}
-                placeholder="Label"
-                className="border rounded p-2 flex-1"
-              />
-              <input
-                {...register(`stats.${i}.value`)}
-                placeholder="Value"
-                className="border rounded p-2 flex-1"
-              />
-              <button
-                type="button"
-                onClick={() => removeStat(i)}
-                className="bg-red-600 text-white px-2 rounded"
-              >
-                X
-              </button>
-            </div>
-          ))}
-          <button
-            type="button"
-            onClick={() => appendStat({ label: "", value: "" })}
-            className="bg-green-600 text-white px-4 py-1 rounded"
-          >
-            + Add Stat
-          </button>
-        </section>
+        {/* ✅ Stats Section */}
+        <StatsSection
+          control={control}
+          register={register}
+          statFields={statFields}
+          appendStat={appendStat}
+          removeStat={removeStat}
+        />
 
         <button
           type="submit"
           className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 mt-4"
         >
-          Save About Page
+          {about?._id ? "Update About Page" : "Create About Page"}
         </button>
       </form>
     </div>

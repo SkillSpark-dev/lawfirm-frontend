@@ -13,14 +13,16 @@ interface AboutHeroSection {
 }
 
 export default function AboutHeroPublicPage() {
+   const API_BASE="https://lawservicesbackend.onrender.com"
   const [sections, setSections] = useState<AboutHeroSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
+    
     const fetchSections = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/info`);
+        const res = await fetch(`${API_BASE}/api/v1/info`);
         const data = await res.json();
         setSections(data.data || []);
       } catch (err) {

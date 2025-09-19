@@ -16,6 +16,8 @@ interface Testimonial {
 const TestimonialSlider = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
+  const API_BASE = "https://lawservicesbackend.onrender.com";
+
   const settings: Settings = {
     dots: true,
     infinite: true,
@@ -30,7 +32,7 @@ const TestimonialSlider = () => {
   useEffect(() => {
     const fetchTestimonials = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/testimonial`);
+        const res = await fetch(`${API_BASE}/api/v1/testimonial`);
         const data = await res.json();
         if (res.ok && data.data) setTestimonials(data.data);
       } catch (err) {

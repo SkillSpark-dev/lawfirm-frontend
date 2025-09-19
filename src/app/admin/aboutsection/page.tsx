@@ -27,13 +27,14 @@ interface HeroFormData {
 }
 
 export default function AdminAboutHeroPage() {
+  
   const [sections, setSections] = useState<AboutHeroSection[]>([]);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editSection, setEditSection] = useState<AboutHeroSection | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+  const API_BASE = "https://lawservicesbackend.onrender.com";
 
   const fetchSections = useCallback(async () => {
     setLoading(true);

@@ -19,6 +19,7 @@ const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const API_BASE = "https://lawservicesbackend.onrender.com"
 
   if (!isOpen) return null;
 
@@ -34,7 +35,7 @@ const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose }) => {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/appointment`,
+        `${API_BASE}/api/v1/appointment`,
         {
           method: "POST",
           headers: {

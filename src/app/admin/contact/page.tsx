@@ -15,6 +15,7 @@ interface ContactResponse {
 }
 
 export default function AdminContactsPage() {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +30,7 @@ export default function AdminContactsPage() {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/contact`);
+      const res = await fetch(`${API_BASE}/api/v1/contact`);
       if (!res.ok) throw new Error("Failed to fetch contacts");
       const data: ContactResponse = await res.json();
       setContacts(data.data || []);
@@ -48,7 +49,7 @@ export default function AdminContactsPage() {
     if (!confirm("Are you sure you want to delete this contact?")) return;
     setSaving(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/contact/${id}`, {
+      const res = await fetch(`${API_BASE}/api/v1/contact/${id}`, {
         method: "DELETE",
       });
       if (!res.ok) throw new Error("Failed to delete contact");

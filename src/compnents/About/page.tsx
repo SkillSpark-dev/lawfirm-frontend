@@ -20,13 +20,14 @@ interface AboutData {
 }
 
 const About = () => {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const [aboutData, setAboutData] = useState<AboutData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchAbout() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/about`, {
+        const res = await fetch(`${API_BASE}/api/v1/about`, {
           cache: "no-store",
         });
         const data = await res.json();

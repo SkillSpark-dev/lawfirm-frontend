@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion} from "framer-motion";
 import { heroImageVariants, heroTextVariants, heroVariants,statVariants } from "@/app/animation";
+
 interface AboutStat {
   label: string;
   value: string;
@@ -12,18 +13,22 @@ interface AboutStat {
 interface AboutData {
   title: string;
   subtitle: string;
-  image?: { url: string };
+  image?: { url: string 
+    
+  };
   stats?: AboutStat[];
 }
 
 export default function AboutPage() {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const [aboutData, setAboutData] = useState<AboutData | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    
     async function fetchAbout() {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/about`);
+        const res = await fetch(`${API_BASE}/api/v1/about`);
         const data = await res.json();
         if (res.ok) setAboutData(data.data);
         else throw new Error(data.message || "Failed to fetch About");
@@ -73,7 +78,7 @@ export default function AboutPage() {
         {aboutData.image?.url && (
           <motion.div className="w-full md:w-1/2 flex justify-center" variants={heroImageVariants}>
             <Image
-              src={aboutData.image.url}
+              src={aboutData.image?.url || "/justichero.jpg"}
               alt="About Hero"
               width={600}
               height={400}

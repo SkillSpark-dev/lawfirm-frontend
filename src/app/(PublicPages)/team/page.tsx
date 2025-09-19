@@ -26,6 +26,7 @@ interface TeamApiResponse {
 }
 
 const TeamPage: React.FC = () => {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -33,7 +34,8 @@ const TeamPage: React.FC = () => {
   useEffect(() => {
     const fetchTeam = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team`);
+
+        const res = await fetch(`${API_BASE}/api/v1/team`);
         if (!res.ok) throw new Error(`Server error ${res.status}`);
 
         const data: TeamApiResponse = await res.json();

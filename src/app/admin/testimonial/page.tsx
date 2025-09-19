@@ -11,6 +11,7 @@ interface Testimonial {
 }
 
 export default function AdminTestimonials() {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -31,7 +32,7 @@ export default function AdminTestimonials() {
 const fetchTestimonials = useCallback(async () => {
   setLoading(true);
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/testimonial`, {
+    const res = await fetch(`${API_BASE}/api/v1/testimonial`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -77,8 +78,8 @@ useEffect(() => {
       if (selectedImage) formData.append("image", selectedImage);
 
       const url = editing
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/testimonial/${editing._id}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/testimonial`;
+        ? `${API_BASE}/api/v1/testimonial/${editing._id}`
+        : `${API_BASE}/api/v1/testimonial`;
 
       const res = await fetch(url, {
         method: editing ? "PATCH" : "POST",
@@ -117,7 +118,7 @@ useEffect(() => {
     if (!confirm("Are you sure you want to delete this testimonial?")) return;
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/testimonial/${id}`, {
+      const res = await fetch(`${API_BASE}/api/v1/testimonial/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -152,7 +153,7 @@ useEffect(() => {
           {preview && (
             <div className="flex items-center gap-2 mt-2">
               <div className="w-20 h-20 relative">
-              <Image src={preview} alt="Preview" className=" rounded-full object-cover" />
+              <Image src={preview} alt="Preview" fill className=" rounded-full object-cover" />
               </div>
               <button type="button" className="text-red-500" onClick={() => { setPreview(null); setSelectedImage(null); }}>
                 Remove

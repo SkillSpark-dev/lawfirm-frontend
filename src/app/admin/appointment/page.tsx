@@ -12,6 +12,7 @@ interface AppointmentData {
 
 
 const Page = () => {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +22,7 @@ const Page = () => {
       setLoading(true);
       setError(null);
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/appointment`
+        `${API_BASE}/api/v1/appointment`
       );
       if (!res.ok) throw new Error("Failed to fetch appointments");
       const data = await res.json();

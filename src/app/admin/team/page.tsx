@@ -19,6 +19,7 @@ interface TeamMember {
 }
 
 export default function AdminTeamPage() {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -46,7 +47,7 @@ export default function AdminTeamPage() {
   if (!token) return;
   setLoading(true);
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team`, {
+    const res = await fetch(`${API_BASE}/api/v1/team`, {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -83,15 +84,19 @@ useEffect(() => {
 
     try {
       const url = editId
-        ? `${process.env.NEXT_PUBLIC_API_URL}/api/v1/team/${editId}`
-        : `${process.env.NEXT_PUBLIC_API_URL}/api/v1/team`;
+        ? `${API_BASE}/api/v1/team/${editId}`
+        : `${API_BASE}/api/v1/team`;
       const method = editId ? "PATCH" : "POST";
+      const cleanLinks: SocialLinks = {
+      linkedin: data.socialLinks?.linkedin || "",
+      facebook: data.socialLinks?.facebook || "",
+    };
 
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("position", data.position);
       formData.append("bio", data.bio || "");
-      formData.append("socialLinks", JSON.stringify(data.socialLinks || {}));
+      formData.append("socialLinks", JSON.stringify(cleanLinks));
 
       if (selectedFile) formData.append("image", selectedFile);
 
@@ -138,7 +143,7 @@ useEffect(() => {
 
     setLoading(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/team/${id}`, {
+      const res = await fetch(`${API_BASE}/api/v1/team/${id}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });

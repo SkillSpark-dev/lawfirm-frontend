@@ -28,6 +28,7 @@ interface ServicesApiResponse {
 }
 
 export default function ServicesPage() {
+  const API_BASE="https://lawservicesbackend.onrender.com"
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +36,8 @@ export default function ServicesPage() {
   useEffect(() => {
     const fetchServices = async () => {
       try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/services`);
+        
+        const res = await fetch(`${API_BASE}/api/v1/services`);
         if (!res.ok) throw new Error(`Server error ${res.status}`);
 
         const data: ServicesApiResponse = await res.json();
