@@ -21,84 +21,81 @@ export default function AdminContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [saving, setSaving] = useState(false);
+
   const router = useRouter();
 
-  const getToken = (): string | null => localStorage.getItem("token");
+  // ✅ Token from localStorage
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  // Fetch all contacts
+  useEffect(() => {
+    if (!token) {
+      router.push("/login"); // redirect if no token
+      return;
+    }
+    fetchContacts();
+  }, [token]);
+
+  // ✅ Fetch contacts
   const fetchContacts = async () => {
     setLoading(true);
     setError(null);
-    const token = getToken();
-    if (!token) {
-      router.push("/admin/login");
-      return;
-    }
-
     try {
       const res = await fetch(`${API_BASE}/api/v1/contact`, {
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
         },
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Failed to fetch contacts");
+        if (res.status === 401) throw new Error("Unauthorized – please log in");
+        throw new Error("Failed to fetch contacts");
       }
 
       const data: ContactResponse = await res.json();
       setContacts(data.data || []);
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("Something went wrong");
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
-  // Delete single contact
+  // ✅ Delete contact
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this contact?")) return;
-
     setSaving(true);
-    const token = getToken();
-    if (!token) {
-      router.push("/admin/login");
-      return;
-    }
-
     try {
       const res = await fetch(`${API_BASE}/api/v1/contact/${id}`, {
         method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
       });
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.message || "Failed to delete contact");
+        if (res.status === 401) throw new Error("Unauthorized – please log in");
+        throw new Error("Failed to delete contact");
       }
 
-      fetchContacts();
+      await fetchContacts(); // refresh list
     } catch (err: unknown) {
-      if (err instanceof Error) setError(err.message);
-      else setError("Failed to delete contact");
+      setError(err instanceof Error ? err.message : "Failed to delete contact");
     } finally {
       setSaving(false);
     }
   };
 
-  useEffect(() => {
-    fetchContacts();
-  }, []);
-
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen space-y-6 relative">
-      <h1 className="text-2xl font-bold text-center sm:text-left">Contact Submissions</h1>
+      <h1 className="text-2xl font-bold text-center sm:text-left">
+        Contact Submissions
+      </h1>
 
+      {/* Loading Overlay */}
       {(loading || saving) && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
           <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
@@ -107,36 +104,34 @@ export default function AdminContactsPage() {
 
       {error && <p className="text-center text-red-500">{error}</p>}
 
-      {/* Desktop Table */}
-      <div className="hidden sm:block bg-white shadow rounded-lg p-4 sm:p-6 overflow-x-auto">
-        <table className="w-full border-collapse text-sm">
-          <thead>
-            <tr className="bg-gray-100 text-left">
-              <th className="border p-2">Name</th>
-              <th className="border p-2">Email</th>
-              <th className="border p-2">Number</th>
-              <th className="border p-2">Date</th>
-              <th className="border p-2 text-center">Actions</th>
+      {/* Table for desktop */}
+      <div className="hidden sm:block overflow-x-auto">
+        <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
+          <thead className="bg-gray-100">
+            <tr>
+              <th className="px-4 py-2 text-left">Name</th>
+              <th className="px-4 py-2 text-left">Email</th>
+              <th className="px-4 py-2 text-left">Number</th>
+              <th className="px-4 py-2 text-left">Message</th>
+              <th className="px-4 py-2 text-left">Date</th>
+              <th className="px-4 py-2 text-left">Actions</th>
             </tr>
           </thead>
           <tbody>
             {contacts.length > 0 ? (
-              contacts.map((c) => (
-                <tr key={c._id} className="border-b hover:bg-gray-50">
-                  <td className="border p-2">{c.name}</td>
-                  <td className="border p-2">{c.email}</td>
-                  <td className="border p-2">{c.number}</td>
-                  <td className="border p-2">{new Date(c.createdAt).toLocaleDateString()}</td>
-                  <td className="border p-2 text-center space-x-2">
+              contacts.map((contact) => (
+                <tr key={contact._id} className="border-t">
+                  <td className="px-4 py-2">{contact.name}</td>
+                  <td className="px-4 py-2">{contact.email}</td>
+                  <td className="px-4 py-2">{contact.number}</td>
+                  <td className="px-4 py-2">{contact.message}</td>
+                  <td className="px-4 py-2">
+                    {new Date(contact.createdAt).toLocaleDateString()}
+                  </td>
+                  <td className="px-4 py-2">
                     <button
-                      onClick={() => setSelectedContact(c)}
-                      className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition"
-                    >
-                      View
-                    </button>
-                    <button
-                      onClick={() => handleDelete(c._id)}
-                      className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 transition"
+                      onClick={() => handleDelete(contact._id)}
+                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
                     >
                       Delete
                     </button>
@@ -145,8 +140,8 @@ export default function AdminContactsPage() {
               ))
             ) : (
               <tr>
-                <td colSpan={5} className="text-center text-gray-500 py-4">
-                  No contacts found
+                <td colSpan={6} className="text-center py-4 text-gray-500">
+                  No contacts found.
                 </td>
               </tr>
             )}
@@ -154,58 +149,33 @@ export default function AdminContactsPage() {
         </table>
       </div>
 
-      {/* Mobile Cards */}
-      <div className="grid gap-4 sm:hidden">
+      {/* Mobile card view */}
+      <div className="sm:hidden space-y-4">
         {contacts.length > 0 ? (
-          contacts.map((c) => (
-            <div key={c._id} className="border rounded-lg p-4 shadow-sm bg-white">
-              <p className="font-semibold">{c.name}</p>
-              <p className="text-sm text-gray-600">{c.email}</p>
-              <p className="text-sm text-gray-600">{c.number}</p>
-              <p className="text-xs text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</p>
-              <div className="flex gap-2 mt-3">
-                <button
-                  onClick={() => setSelectedContact(c)}
-                  className="flex-1 bg-blue-600 text-white px-3 py-2 rounded hover:bg-blue-700 transition"
-                >
-                  View
-                </button>
-                <button
-                  onClick={() => handleDelete(c._id)}
-                  className="flex-1 bg-red-600 text-white px-3 py-2 rounded hover:bg-red-700 transition"
-                >
-                  Delete
-                </button>
-              </div>
+          contacts.map((contact) => (
+            <div
+              key={contact._id}
+              className="bg-white shadow-md rounded-lg p-4 space-y-2"
+            >
+              <p className="font-medium">Name: {contact.name}</p>
+              <p>Email: {contact.email}</p>
+              <p>Number: {contact.number}</p>
+              <p>Message: {contact.message}</p>
+              <p>
+                Date: {new Date(contact.createdAt).toLocaleDateString()}
+              </p>
+              <button
+                onClick={() => handleDelete(contact._id)}
+                className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+              >
+                Delete
+              </button>
             </div>
           ))
         ) : (
-          <p className="text-center text-gray-500 py-4">No contacts found</p>
+          <p className="text-center text-gray-500">No contacts found.</p>
         )}
       </div>
-
-      {/* Modal for Viewing Contact */}
-      {selectedContact && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg w-[90%] max-w-md p-6 space-y-3 relative">
-            <button
-              onClick={() => setSelectedContact(null)}
-              className="absolute top-3 right-3 text-gray-500 hover:text-black"
-            >
-              ✖
-            </button>
-            <h2 className="text-xl font-bold">Contact Details</h2>
-            <p><span className="font-semibold">Name:</span> {selectedContact.name}</p>
-            <p><span className="font-semibold">Email:</span> {selectedContact.email}</p>
-            <p><span className="font-semibold">Number:</span> {selectedContact.number}</p>
-            <p><span className="font-semibold">Message:</span> {selectedContact.message}</p>
-            <p className="text-sm text-gray-500">
-              <span className="font-semibold">Date:</span>{" "}
-              {new Date(selectedContact.createdAt).toLocaleString()}
-            </p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }
