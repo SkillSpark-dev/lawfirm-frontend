@@ -1,17 +1,21 @@
 "use client";
 
 import React, { useState } from "react";
+import { RiCloseLine } from "react-icons/ri";
 
 interface AppointmentFormProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void; // callback to refresh list
 }
 
-const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose }) => {
+const API_BASE = "https://lawservicesbackend.onrender.com";
+
+const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    number: "",
+    phone: "",
     date: "",
     time: "",
   });
@@ -19,7 +23,6 @@ const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
-  const API_BASE = "https://lawservicesbackend.onrender.com"
 
   if (!isOpen) return null;
 
@@ -34,118 +37,92 @@ const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose }) => {
     setSuccess(null);
 
     try {
-      const res = await fetch(
-        `${API_BASE}/api/v1/appointment`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const res = await fetch(`${API_BASE}/api/v1/appointment`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
 
-      if (!res.ok) throw new Error("Failed to book appointment");
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Failed to book appointment");
+
       setSuccess("✅ Appointment booked successfully!");
-      setFormData({ name: "", email: "", number: "", date: "", time: "" });
+      setFormData({ name: "", email: "", phone: "", date: "", time: "" });
 
-      // Close modal after 1.5s
       setTimeout(() => {
         setSuccess(null);
         onClose();
+        if (onSuccess) onSuccess();
       }, 1500);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to book appointment");
+      console.error("Booking failed:", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50 p-4">
-      <div className="bg-white dark:bg-gray-900 rounded-lg shadow-lg w-full max-w-lg md:max-w-xl p-6 relative">
-        <h2 className="text-lg md:text-2xl font-bold mb-4 text-gray-900 dark:text-white text-center">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/20 z-50 p-4">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-lg md:max-w-xl p-6 relative">
+        {/* Cross button */}
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-900"
+          title="Close"
+        >
+          <RiCloseLine size={24} />
+        </button>
+
+        <h2 className="text-2xl font-bold mb-4 text-gray-900 text-center">
           Book an Appointment
         </h2>
 
-        {error && <p className="text-red-500 text-center">{error}</p>}
-        {success && <p className="text-green-500 text-center">{success}</p>}
+        {error && <p className="text-red-500 text-center mb-2">{error}</p>}
+        {success && <p className="text-green-500 text-center mb-2">{success}</p>}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
-          <div>
-            <label className="block text-sm md:text-base text-gray-700 dark:text-gray-300">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md dark:bg-gray-800 dark:text-white text-sm md:text-base"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm md:text-base text-gray-700 dark:text-gray-300">
-              Email
-            </label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md dark:bg-gray-800 dark:text-white text-sm md:text-base"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm md:text-base text-gray-700 dark:text-gray-300">
-              Phone Number
-            </label>
-            <input
-              type="tel"
-              name="number"
-              value={formData.number}
-              onChange={handleChange}
-              className="w-full p-2 border rounded-md dark:bg-gray-800 dark:text-white text-sm md:text-base"
-              required
-            />
-          </div>
+          {["name", "email", "phone"].map((field) => (
+            <div key={field}>
+              <label className="block text-gray-700 text-sm md:text-base mb-1">
+                {field.charAt(0).toUpperCase() + field.slice(1)}
+              </label>
+              <input
+                type={field === "email" ? "email" : "text"}
+                name={field}
+                value={formData[field as keyof typeof formData]}
+                onChange={handleChange}
+                className="w-full p-2 border rounded-md bg-white text-gray-900 text-sm md:text-base"
+                required
+              />
+            </div>
+          ))}
+
           <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <label className="block text-sm md:text-base text-gray-700 dark:text-gray-300">
-                Date
-              </label>
-              <input
-                type="date"
-                name="date"
-                value={formData.date}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-md dark:bg-gray-800 dark:text-white text-sm md:text-base"
-                required
-              />
-            </div>
-            <div className="flex-1">
-              <label className="block text-sm md:text-base text-gray-700 dark:text-gray-300">
-                Time
-              </label>
-              <input
-                type="time"
-                name="time"
-                value={formData.time}
-                onChange={handleChange}
-                className="w-full p-2 border rounded-md dark:bg-gray-800 dark:text-white text-sm md:text-base"
-                required
-              />
-            </div>
+            {["date", "time"].map((field) => (
+              <div className="flex-1" key={field}>
+                <label className="block text-gray-700 text-sm md:text-base mb-1">
+                  {field.charAt(0).toUpperCase() + field.slice(1)}
+                </label>
+                <input
+                  type={field}
+                  name={field}
+                  value={formData[field as keyof typeof formData]}
+                  onChange={handleChange}
+                  className="w-full p-2 border rounded-md bg-white text-gray-900 text-sm md:text-base"
+                  required
+                />
+              </div>
+            ))}
           </div>
 
           <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-4 py-2 bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white rounded-md"
+              className="w-full sm:w-auto px-4 py-2 bg-gray-300 text-gray-900 rounded-md hover:bg-gray-400 transition-colors"
               disabled={loading}
             >
               Cancel

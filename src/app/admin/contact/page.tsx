@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface Contact {
   _id: string;
@@ -14,62 +15,90 @@ interface ContactResponse {
   data: Contact[];
 }
 
+const API_BASE = "https://lawservicesbackend.onrender.com";
+
 export default function AdminContactsPage() {
-  const API_BASE="https://lawservicesbackend.onrender.com"
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
   const [saving, setSaving] = useState(false);
+  const router = useRouter();
 
-  useEffect(() => {
-    fetchContacts();
-  }, []);
+  const getToken = (): string | null => localStorage.getItem("token");
 
+  // Fetch all contacts
   const fetchContacts = async () => {
     setLoading(true);
     setError(null);
+    const token = getToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
     try {
-      const res = await fetch(`${API_BASE}/api/v1/contact`);
-      if (!res.ok) throw new Error("Failed to fetch contacts");
+      const res = await fetch(`${API_BASE}/api/v1/contact`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to fetch contacts");
+      }
+
       const data: ContactResponse = await res.json();
       setContacts(data.data || []);
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Something went wrong");
-      }
+      if (err instanceof Error) setError(err.message);
+      else setError("Something went wrong");
     } finally {
       setLoading(false);
     }
   };
 
+  // Delete single contact
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this contact?")) return;
+
     setSaving(true);
+    const token = getToken();
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
     try {
       const res = await fetch(`${API_BASE}/api/v1/contact/${id}`, {
         method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
       });
-      if (!res.ok) throw new Error("Failed to delete contact");
-      fetchContacts(); // refresh list
-    } catch (err: unknown) {
-      if (err instanceof Error) {
-        setError(err.message);
-      } else {
-        setError("Failed to delete contact");
+
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || "Failed to delete contact");
       }
+
+      fetchContacts();
+    } catch (err: unknown) {
+      if (err instanceof Error) setError(err.message);
+      else setError("Failed to delete contact");
     } finally {
       setSaving(false);
     }
   };
 
+  useEffect(() => {
+    fetchContacts();
+  }, []);
+
   return (
     <div className="p-4 sm:p-6 lg:p-8 bg-gray-50 min-h-screen space-y-6 relative">
       <h1 className="text-2xl font-bold text-center sm:text-left">Contact Submissions</h1>
 
-      {/* Loading Overlay */}
       {(loading || saving) && (
         <div className="fixed inset-0 bg-black/20 flex items-center justify-center z-50">
           <div className="animate-spin h-12 w-12 border-4 border-blue-500 border-t-transparent rounded-full"></div>
@@ -97,9 +126,7 @@ export default function AdminContactsPage() {
                   <td className="border p-2">{c.name}</td>
                   <td className="border p-2">{c.email}</td>
                   <td className="border p-2">{c.number}</td>
-                  <td className="border p-2">
-                    {new Date(c.createdAt).toLocaleDateString()}
-                  </td>
+                  <td className="border p-2">{new Date(c.createdAt).toLocaleDateString()}</td>
                   <td className="border p-2 text-center space-x-2">
                     <button
                       onClick={() => setSelectedContact(c)}
@@ -135,9 +162,7 @@ export default function AdminContactsPage() {
               <p className="font-semibold">{c.name}</p>
               <p className="text-sm text-gray-600">{c.email}</p>
               <p className="text-sm text-gray-600">{c.number}</p>
-              <p className="text-xs text-gray-500">
-                {new Date(c.createdAt).toLocaleDateString()}
-              </p>
+              <p className="text-xs text-gray-500">{new Date(c.createdAt).toLocaleDateString()}</p>
               <div className="flex gap-2 mt-3">
                 <button
                   onClick={() => setSelectedContact(c)}

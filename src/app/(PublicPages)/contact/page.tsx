@@ -12,8 +12,9 @@ interface ContactFormData {
   message: string;
 }
 
+const API_BASE = "https://lawservicesbackend.onrender.com";
+
 export default function ContactPage() {
-   const API_BASE="https://lawservicesbackend.onrender.com"
   const [loading, setLoading] = useState(false);
 
   const {
@@ -23,10 +24,9 @@ export default function ContactPage() {
     formState: { errors },
   } = useForm<ContactFormData>();
 
-  async function onSubmit(data: ContactFormData) {
+  const onSubmit = async (data: ContactFormData) => {
     setLoading(true);
     try {
-     
       const res = await fetch(`${API_BASE}/api/v1/contact`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -34,22 +34,25 @@ export default function ContactPage() {
       });
 
       if (!res.ok) {
-        const errorData = await res.json();
+        const errorData = await res.json().catch(() => ({}));
         throw new Error(errorData.message || "Failed to send message");
       }
 
       reset();
-      alert("Message sent successfully! We'll get back to you soon.");
+      alert("✅ Message sent successfully! We'll get back to you soon.");
     } catch (err: unknown) {
-    if(err instanceof Error){
-      alert(`Error: ${err.message}`);
-    }else{
-      alert("Something went wrong, please try again.");
-    }
+      if (err instanceof Error) alert(`❌ Error: ${err.message}`);
+      else alert("❌ Something went wrong, please try again.");
     } finally {
       setLoading(false);
     }
-  }
+  };
+
+  const fields: { name: keyof ContactFormData; type: string; placeholder?: string }[] = [
+    { name: "name", type: "text", placeholder: "Your Name" },
+    { name: "email", type: "email", placeholder: "Your Email" },
+    { name: "number", type: "tel", placeholder: "Phone Number" },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
@@ -65,7 +68,7 @@ export default function ContactPage() {
         </p>
       </motion.header>
 
-      {/* CONTENT */}
+      {/* MAIN CONTENT */}
       <main className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 p-6 w-full flex-1 mt-7">
         {/* CONTACT FORM */}
         <motion.div
@@ -78,61 +81,53 @@ export default function ContactPage() {
             className="text-2xl font-semibold mb-4"
             custom={1}
             variants={formVariants}
-            initial="hidden"
-            animate="visible"
           >
             Send Us a Message
           </motion.h2>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            {["name", "email", "number", "message"].map((field, index) => (
-              <motion.div
-                key={field}
-                custom={index + 2}
-                variants={formVariants}
-                initial="hidden"
-                animate="visible"
-              >
-                {field !== "message" ? (
-                  <input
-                    type={field === "email" ? "email" : field === "number" ? "tel" : "text"}
-                    placeholder={
-                      field === "number"
-                        ? "Phone Number"
-                        : `Your ${field.charAt(0).toUpperCase() + field.slice(1)}`
-                    }
-                    {...register(field as keyof ContactFormData, {
-                      required: `${field.charAt(0).toUpperCase() + field.slice(1)} is required`,
-                      pattern:
-                        field === "email"
-                          ? { value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/, message: "Invalid email address" }
-                          : field === "number"
-                          ? { value: /^[0-9]{7,15}$/, message: "Enter a valid phone number" }
-                          : undefined,
-                    })}
-                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
-                  />
-                ) : (
-                  <textarea
-                    placeholder="Your Message"
-                    rows={4}
-                    {...register("message", { required: "Message is required" })}
-                    className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none resize-none"
-                  />
-                )}
-                {errors[field as keyof ContactFormData] && (
-                  <p className="text-red-500 text-sm">{errors[field as keyof ContactFormData]?.message}</p>
+            {fields.map((field, index) => (
+              <motion.div key={field.name} custom={index + 2} variants={formVariants}>
+                <input
+                  type={field.type}
+                  placeholder={field.placeholder}
+                  {...register(field.name, {
+                    required: `${field.placeholder} is required`,
+                    pattern:
+                      field.name === "email"
+                        ? {
+                            value: /^[^@ ]+@[^@ ]+\.[^@ .]{2,}$/,
+                            message: "Invalid email address",
+                          }
+                        : field.name === "number"
+                        ? { value: /^[0-9]{7,15}$/, message: "Enter a valid phone number" }
+                        : undefined,
+                  })}
+                  className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none"
+                />
+                {errors[field.name] && (
+                  <p className="text-red-500 text-sm mt-1">{errors[field.name]?.message}</p>
                 )}
               </motion.div>
             ))}
+
+            <motion.div custom={5} variants={formVariants}>
+              <textarea
+                placeholder="Your Message"
+                rows={4}
+                {...register("message", { required: "Message is required" })}
+                className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-blue-400 outline-none resize-none"
+              />
+              {errors.message && (
+                <p className="text-red-500 text-sm mt-1">{errors.message.message}</p>
+              )}
+            </motion.div>
 
             <motion.button
               type="submit"
               disabled={loading}
               custom={6}
               variants={formVariants}
-              initial="hidden"
-              animate="visible"
               className="w-full bg-blue-700 text-white py-3 rounded-lg hover:bg-blue-800 transition disabled:opacity-50"
             >
               {loading ? "Sending..." : "Send Message"}

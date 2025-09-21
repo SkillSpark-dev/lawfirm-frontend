@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 export default function Login() {
+  const API_BASE = "https://lawservicesbackend.onrender.com";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +19,7 @@ export default function Login() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/user/login`,
+        `${API_BASE}/api/v1/user/login`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -55,7 +56,9 @@ export default function Login() {
             <Image
               src="/logo.png"
               alt="Logo"
-              className="h-16 w-16 rounded-full object-cover"
+              width={128}
+              height={128}
+              className="rounded-full object-cover"
             />
             {/* kasto ho kyw  */}
           </div>
@@ -119,7 +122,7 @@ export default function Login() {
               {isLoading ? (
                 <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-b-2 border-white"></div>
               ) : (
-                "Sign in"
+                "Login"
               )}
             </button>
 
