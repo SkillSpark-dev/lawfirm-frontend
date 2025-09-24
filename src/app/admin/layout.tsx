@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
-import Sidebar from "./sidebar/page";
+import Sidebar from "@/compnents/Admin/sidebar";
 import { GiHamburgerMenu } from "react-icons/gi";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -40,7 +40,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile Sidebar */}
       <div
-        className={`fixed inset-y-0 left-0 w-64 bg-blue-850 text-white z-50 transform transition-transform duration-300 shadow-lg lg:hidden`}
+        className={`fixed inset-y-0 left-0 w-64 bg-blue-800 text-white z-50 transform transition-transform duration-300 shadow-lg lg:hidden`}
         style={{ transform: sidebarOpen ? "translateX(0)" : "translateX(-100%)" }}
       >
         <Sidebar logout={logout} setMobileOpen={setSidebarOpen} />
@@ -49,7 +49,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       {/* Mobile Overlay */}
       {sidebarOpen && (
         <div
-          className="fixed inset-0 bg-white text-gray-900 bg-opacity-50 z-40 lg:hidden"
+          className="fixed inset-0 bg-black/40 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -61,13 +61,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
       {/* Mobile toggle button */}
       {!sidebarOpen && (
-  <button
-    className="fixed top-4 right-4 z-60 p-3 bg-gray-850 text-gray-900 rounded-full shadow-lg lg:hidden"
-    onClick={() => setSidebarOpen(true)}
-  >
-    <GiHamburgerMenu size={20} />
-  </button>
-)}
+        <button
+          className="fixed top-4 right-4 z-[60] p-3 bg-gray-800 text-white rounded-full shadow-lg lg:hidden"
+          onClick={() => setSidebarOpen(true)}
+        >
+          <GiHamburgerMenu size={20} />
+        </button>
+      )}
     </div>
   );
 }

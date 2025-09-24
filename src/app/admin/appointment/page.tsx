@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 interface AppointmentData {
@@ -23,44 +23,51 @@ const AdminAppointmentsPage: React.FC = () => {
   const getToken = (): string | null => localStorage.getItem("token");
 
   // Reusable fetch with auth
-  const authFetch = async (url: string, options: RequestInit = {}) => {
-    const token = getToken();
-    if (!token) {
-      router.push("/admin/login"); // redirect if no token
-      return;
-    }
+  const authFetch = useCallback(
+    async (url: string, options: RequestInit = {}) => {
+      const token = getToken();
+      if (!token) {
+        router.push("/admin/login"); // redirect if no token
+        return;
+      }
 
-    const res = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-        ...(options.headers || {}),
-      },
-    });
+      const res = await fetch(url, {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+          ...(options.headers || {}),
+        },
+      });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      throw new Error(data.message || res.statusText || "Request failed");
-    }
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data.message || res.statusText || "Request failed");
+      }
 
-    return res.json();
-  };
+      return res.json();
+    },
+    [router] // ✅ include router
+  );
 
   // Fetch all appointments
-  const fetchAppointments = async () => {
+  const fetchAppointments = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const data = await authFetch(`${API_BASE}/api/v1/appointment`);
-      setAppointments(data.data || []);
+      if (data) setAppointments(data.data || []);
     } catch (err: unknown) {
       if (err instanceof Error) setError(err.message);
       else setError("Failed to fetch appointments");
     } finally {
       setLoading(false);
     }
-  };
+  }, [authFetch]); // ✅ depends on authFetch
+
+  useEffect(() => {
+    fetchAppointments();
+  }, [fetchAppointments]);
 
   // Delete a single appointment
   const deleteAppointment = async (id: string) => {
@@ -73,10 +80,6 @@ const AdminAppointmentsPage: React.FC = () => {
       else setError("Failed to delete appointment");
     }
   };
-
-  useEffect(() => {
-    fetchAppointments();
-  }, []);
 
   return (
     <div className="p-6 min-h-screen bg-gray-50">

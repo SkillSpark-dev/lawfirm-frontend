@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { RxHamburgerMenu } from "react-icons/rx";
+import { RxHamburgerMenu, RxCross2 } from "react-icons/rx";
 import { headerData } from "../assets/mockdata";
 import Image from "next/image";
 
@@ -10,18 +10,18 @@ function Header() {
 
   return (
     <div
-      className=" bg-cover bg-center text-white"
+      className="bg-cover bg-center text-white"
       style={{ backgroundImage: 'url("/headerbg.png")' }}
     >
-      <header className="flex justify-between items-center p-4 shadow-md bg-transparent  h-[10vh]  relative">
+      <header className="flex justify-between items-center p-4 shadow-md bg-transparent h-[10vh] relative">
         {/* Logo + Title */}
         <div className="flex items-center gap-3">
           {headerData.logo && (
             <div className="relative w-8 h-8">
-    <Image src="/logo.png" alt="Logo" fill className="object-contain" />
-  </div>
+              <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+            </div>
           )}
-          <h1 className="text-sm  md:text-lg font-bold">{headerData.title}</h1>
+          <h1 className="text-sm md:text-lg font-bold">{headerData.title}</h1>
         </div>
 
         {/* Desktop Navigation */}
@@ -48,14 +48,16 @@ function Header() {
           className="md:hidden p-2"
           onClick={() => setMenuOpen(!menuOpen)}
         >
-          <div className="space-y-1">
-            <RxHamburgerMenu />
-          </div>
+          {menuOpen ? (
+            <RxCross2 size={24} className="text-white" />
+          ) : (
+            <RxHamburgerMenu size={24} className="text-white" />
+          )}
         </button>
 
         {/* Mobile Menu */}
         {menuOpen && (
-          <div className="absolute top-full left-0 w-full bg-white shadow-md p-4 flex flex-col gap-4 md:hidden">
+          <div className="absolute top-full left-0 w-full bg-white shadow-md p-4 flex flex-col gap-4 md:hidden z-50">
             {headerData.navLinks?.map((link, idx) => (
               <a
                 key={idx}

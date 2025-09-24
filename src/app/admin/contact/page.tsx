@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
 interface Contact {
@@ -29,16 +29,10 @@ export default function AdminContactsPage() {
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
-  useEffect(() => {
-    if (!token) {
-      router.push("/login"); // redirect if no token
-      return;
-    }
-    fetchContacts();
-  }, [token]);
+  // ✅ Fetch contacts (wrapped in useCallback)
+  const fetchContacts = useCallback(async () => {
+    if (!token) return;
 
-  // ✅ Fetch contacts
-  const fetchContacts = async () => {
     setLoading(true);
     setError(null);
     try {
@@ -61,7 +55,16 @@ export default function AdminContactsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [token]);
+
+  // ✅ UseEffect with dependencies
+  useEffect(() => {
+    if (!token) {
+      router.push("/login");
+      return;
+    }
+    fetchContacts();
+  }, [token, router, fetchContacts]);
 
   // ✅ Delete contact
   const handleDelete = async (id: string) => {
