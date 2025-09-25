@@ -11,6 +11,8 @@ import {
   RiCloseLine,
   RiTeamLine,
 } from "react-icons/ri";
+import { IoMdLogOut } from "react-icons/io";
+
 import { ImImages } from "react-icons/im";
 import { TbFileDescription } from "react-icons/tb";
 import { CiCircleInfo } from "react-icons/ci";
@@ -103,7 +105,7 @@ export default function Sidebar({ logout, setMobileOpen }: SidebarProps) {
           onClick={logout}
           className="flex items-center gap-2 px-3 py-2 bg-blue-600 rounded hover:bg-red-600 hover:text-white transition-colors w-full"
         >
-          <RiCloseLine size={18} />
+          <IoMdLogOut size={18} />
           <span>Logout</span>
         </button>
       </div>

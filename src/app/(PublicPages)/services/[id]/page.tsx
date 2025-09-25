@@ -67,7 +67,7 @@ export default async function ServiceDetailPage({ params }: ServiceDetailPagePro
 
           {/* Features */}
           {service.serviceCardFeatures?.length ? (
-            <div>
+            <div className="flex flex-col px-20 ">
               <h2 className="text-2xl font-semibold mb-2">Key Features</h2>
               <ul className="list-disc list-inside space-y-1 text-gray-600">
                 {service.serviceCardFeatures.map((feature, idx) => (
