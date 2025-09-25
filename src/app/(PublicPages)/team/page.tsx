@@ -88,7 +88,7 @@ const TeamPage: React.FC = () => {
                   initial="hidden"
                   whileInView="visible"
                   whileHover="hover"
-                  viewport={{ once: true, amount: 0.3 }}
+                  viewport={{ once: false, amount: 0.3 }}
                   className="flex flex-col justify-center items-center p-6 rounded-3xl shadow-lg text-center cursor-pointer"
                 >
                   <motion.div className="w-32 h-32 mx-auto mb-4 relative" variants={imageVariants}>

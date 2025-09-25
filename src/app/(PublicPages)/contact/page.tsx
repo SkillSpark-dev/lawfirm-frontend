@@ -61,6 +61,7 @@ export default function ContactPage() {
         className="bg-blue-500 text-white text-center py-10 px-4 mt-5"
         initial={{ opacity: 0, y: -50 }}
         animate={{ opacity: 1, y: 0, transition: { duration: 0.6 } }}
+        
       >
         <h1 className="text-3xl md:text-4xl font-bold">Contact Us</h1>
         <p className="text-blue-100 mt-2">
@@ -76,6 +77,7 @@ export default function ContactPage() {
           whileHover={sectionHover}
           initial="hidden"
           animate="visible"
+          
         >
           <motion.h2
             className="text-2xl font-semibold mb-4"

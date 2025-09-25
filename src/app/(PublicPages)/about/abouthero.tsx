@@ -64,7 +64,7 @@ export default function AboutPage() {
         className="flex flex-col md:flex-row items-center gap-8"
         initial="hidden"
         whileInView="visible"
-        viewport={{ once: true }}
+        viewport={{ once: false , amount: 0.3}}
       >
         <motion.div className="w-full md:w-1/2 text-center md:text-left space-y-4" variants={heroVariants}>
           <motion.p className="text-3xl md:text-5xl font-bold text-gray-900" variants={heroTextVariants}>

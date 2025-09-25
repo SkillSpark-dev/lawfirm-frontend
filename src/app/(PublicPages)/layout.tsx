@@ -10,7 +10,7 @@ const MainLayout = ({ children }: Props) => {
   return (
     <>
     
-    <div style={{backgroundImage: "url('/theme.webp')" }}>
+    <div >
    
       <Header />
       {children}

@@ -49,25 +49,31 @@ const About = () => {
     return <div className="flex justify-center items-center h-60 text-xl text-red-600">Failed to load About data.</div>;
 
   return (
-    <section className="px-8 py-16 md:py-24 flex flex-col md:flex-row items-center gap-10">
+    <section className="px-4 sm:px-8 md:px-16 lg:px-40 py-8 md:py-16 flex flex-col md:flex-row items-center gap-10">
+
       {/* Left side (image) */}
-      <motion.div className="w-full md:w-1/2" initial="hidden" animate="visible" variants={imagesVariants}>
+      <motion.div
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: false, amount: 0.3 }}
+  variants={imagesVariants}
+>
         <Image
           src={aboutData.image?.url || "/justichero.jpg"}
           alt="About our law firm"
           width={500}
           height={400}
-          className="rounded-2xl shadow-lg object-cover"
+          className="rounded-xl shadow-lg object-cover"
         />
       </motion.div>
 
       {/* Right side (content) */}
-      <motion.div className="w-full md:w-1/2 space-y-6" initial="hidden" animate="visible">
-        <motion.h2 className="text-3xl font-bold text-gray-950" custom={1} variants={textsVariants}>
+      <motion.div className="w-full md:w-1/2 space-y-6" initial="hidden" whileInView="visible" viewport={{once: false, amount: 0.3}} variants={textsVariants}>
+        <motion.h2 className="text-3xl font-bold text-white" custom={1} variants={textsVariants}>
           {aboutData.title}
         </motion.h2>
         {aboutData.subtitle && (
-          <motion.p className="text-gray-950 text-sm" custom={2} variants={textsVariants}>
+          <motion.p className="text-white text-sm" custom={2} variants={textsVariants}>
             {aboutData.subtitle}
           </motion.p>
         )}
@@ -76,8 +82,8 @@ const About = () => {
           <div className="grid grid-cols-2 gap-6 mt-6">
             {aboutData.stats.map((stat, index) => (
               <motion.div key={index} className="text-center" custom={index + 3} variants={textsVariants}>
-                <h3 className="text-4xl font-bold text-green-600">{stat.value}</h3>
-                <p className="text-blue-950 text-sm">{stat.label}</p>
+                <h3 className="text-4xl font-bold text-white">{stat.value}</h3>
+                <p className="text-white text-sm">{stat.label}</p>
               </motion.div>
             ))}
           </div>
@@ -87,11 +93,11 @@ const About = () => {
         <motion.div className="mt-10">
           <Link href="/contact">
             <motion.button
-              className="flex items-center gap-2 text-black hover:text-white transition-colors border-b bg-blue-700 py-2 px-4 rounded-2xl text-sm font-bold hover:bg-blue-900 cursor-pointer"
+              className="flex items-center gap-2 text-white  transition-colors  bg-amber-500 py-2 px-4 rounded-xl text-sm font-bold hover:bg-amber-600 cursor-pointer"
               variants={buttonsVariants}
               initial="hidden"
-              animate="visible"
-              whileHover="hover"
+                whileInView="visible"
+  viewport={{ once: false, amount: 0.3 }}
             >
               Contact Us
             </motion.button>

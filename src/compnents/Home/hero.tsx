@@ -25,15 +25,16 @@ const Hero = () => {
  */}
   return (
     <>
-      <div>
+      
         <section className="flex flex-col md:flex-row items-center justify-between px-8 py-16 gap-10">
           {/* Left side (text) */}
           <motion.div
             className="max-w-xl space-y-6"
-            initial="hidden"
-            animate="visible"
-            custom={1}
-            variants={bannertextVariants}
+             initial="hidden"
+  whileInView="visible"
+  viewport={{ once: false, amount: 0.3 }}
+  custom={1}
+  variants={bannertextVariants}
           >
             <h1 className="text-4xl md:text-6xl font-bold text-shadow-white">
               {heroData.title}
@@ -45,8 +46,10 @@ const Hero = () => {
           <motion.div
             className="mt-10 md:mt-0 px-10"
             initial="hidden"
-            animate="visible"
+           
             variants={contentVariants}
+             whileInView="visible"
+  viewport={{ once: false, amount: 0.3 }}
           >
             <p className="text-white text-small">
               We partner with companies to minimize risks, maximize
@@ -58,20 +61,21 @@ const Hero = () => {
               className="inline-block px-6 py-3 bg-amber-600 text-white text-sm font-bold rounded-lg shadow pointer-cursor hover:bg-amber-700 transition mt-10"
               variants={bannerbuttonVariants}
               initial="hidden"
-              animate="visible"
-              whileHover="hover"
+             whileInView="visible"
+  viewport={{ once: false, amount: 0.3 }}
             >
               {heroData.buttonText}
             </motion.button>
           </motion.div>
         </section>
-      </div>
+      
 
       {/* Banner: Always rendered, but positioned with Tailwind responsive classes */}
       <motion.div
         className="relative md:absolute md:right-0 md:-bottom-32 w-full md:w-[70%] mt-6 md:mt-0"
         initial="hidden"
-        animate="visible"
+        whileInView="visible"
+  viewport={{ once: false, amount: 0.3 }}
         variants={bannerVariants}
       >
         <Banner />

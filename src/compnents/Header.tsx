@@ -30,7 +30,7 @@ function Header() {
             <a
               key={idx}
               href={link.href}
-              className="text-sm hover:text-blue-600"
+              className="text-sm hover:underline hover:text-amber-500"
             >
               {link.label}
             </a>
@@ -62,7 +62,7 @@ function Header() {
               <a
                 key={idx}
                 href={link.href}
-                className="text-sm text-black hover:text-blue-600"
+                className="text-sm text-black hover:underline hover:text-amber-500"
                 onClick={() => setMenuOpen(false)}
               >
                 {link.label}

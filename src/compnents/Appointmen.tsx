@@ -118,18 +118,18 @@ const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose, onSucces
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row justify-between gap-3 mt-6">
+          <div className="flex flex-col sm:flex-row justify-between px-6  mt-6">
             <button
               type="button"
               onClick={onClose}
-              className="w-full sm:w-auto px-4 py-2 bg-gray-300 text-gray-900 rounded-md hover:bg-gray-400 transition-colors"
+              className="w-32 h-8 sm:w-auto px-4 py-2 bg-gray-300 text-gray-900 text-sm rounded-md hover:bg-gray-400 transition-colors"
               disabled={loading}
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="w-full sm:w-auto px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 disabled:opacity-50"
+              className="w-32 h-8 sm:w-auto px-4 py-2 bg-amber-600 text-white  text-sm rounded-lg hover:bg-amber-700 disabled:opacity-50"
               disabled={loading}
             >
               {loading ? "Submitting..." : "Submit"}

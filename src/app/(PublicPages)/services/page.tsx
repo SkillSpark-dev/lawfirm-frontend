@@ -84,7 +84,7 @@ export default function ServicesPage() {
               initial="hidden"
               whileInView="visible"
               whileHover="hover"
-              viewport={{ once: true }}
+              viewport={{ once: false , amount: 0.3 }}
             >
               <Link href={`/services/${service._id}`} className="block">
                 <motion.div className="relative w-full h-48" variants={elementVariants[0]}>
