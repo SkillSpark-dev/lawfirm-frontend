@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { motion} from "framer-motion";
 import { sectionVariants, buttonVariants } from "@/app/animation";
+import API_BASE from "@/app/BaseUrl";
 interface AboutHeroSection {
   _id: string;
   title: string;
@@ -13,7 +14,7 @@ interface AboutHeroSection {
 }
 
 export default function AboutHeroPublicPage() {
-   const API_BASE="https://lawservicesbackend.onrender.com"
+   
   const [sections, setSections] = useState<AboutHeroSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");

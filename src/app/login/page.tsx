@@ -3,9 +3,8 @@ import Image from "next/image";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-
+import API_BASE from "../BaseUrl";
 export default function Login() {
-  const API_BASE = "https://lawservicesbackend.onrender.com";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");

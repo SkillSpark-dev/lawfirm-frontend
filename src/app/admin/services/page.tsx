@@ -5,7 +5,7 @@ import { useForm, useFieldArray, SubmitHandler } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
-
+import API_BASE from "@/app/BaseUrl";
 // --- Types ---
 interface Service {
   _id: string;
@@ -40,7 +40,7 @@ const serviceSchema = z.object({
 type ServiceFormInputs = z.infer<typeof serviceSchema>;
 
 export default function AdminServicesPage() {
-  const API_BASE = "https://lawservicesbackend.onrender.com";
+  
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,7 +85,7 @@ export default function AdminServicesPage() {
     } finally {
       setLoading(false);
     }
-  }, [API_BASE]);
+  }, []);
 
   useEffect(() => { fetchServices(); }, [fetchServices]);
 

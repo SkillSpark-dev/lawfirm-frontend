@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { formVariants, sectionHover } from "@/app/animation";
-
+import API_BASE from "@/app/BaseUrl";
 interface ContactFormData {
   name: string;
   email: string;
@@ -12,7 +12,7 @@ interface ContactFormData {
   message: string;
 }
 
-const API_BASE = "https://lawservicesbackend.onrender.com";
+
 
 export default function ContactPage() {
   const [loading, setLoading] = useState(false);

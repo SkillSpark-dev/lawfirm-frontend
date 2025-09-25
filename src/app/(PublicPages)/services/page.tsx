@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { cardVariants, elementVariants, cardColors } from "@/app/animation";
-
+import API_BASE from "@/app/BaseUrl";
 interface ServiceDetail {
   title: string;
   description: string;
@@ -28,7 +28,7 @@ interface ServicesApiResponse {
 }
 
 export default function ServicesPage() {
-  const API_BASE="https://lawservicesbackend.onrender.com"
+ 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

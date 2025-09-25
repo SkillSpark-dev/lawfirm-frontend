@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import API_BASE from "@/app/BaseUrl";
 
 interface Contact {
   _id: string;
@@ -14,8 +15,6 @@ interface Contact {
 interface ContactResponse {
   data: Contact[];
 }
-
-const API_BASE = "https://lawservicesbackend.onrender.com";
 
 export default function AdminContactsPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);

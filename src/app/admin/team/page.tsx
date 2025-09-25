@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { FaLinkedin, FaFacebook } from "react-icons/fa";
-
+import API_BASE from "@/app/BaseUrl";
  interface SocialLinks {
   linkedin?: string;
   facebook?: string;
@@ -19,7 +19,7 @@ interface TeamMember {
 }
 
 export default function AdminTeamPage() {
-  const API_BASE="https://lawservicesbackend.onrender.com"
+  
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [editId, setEditId] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);

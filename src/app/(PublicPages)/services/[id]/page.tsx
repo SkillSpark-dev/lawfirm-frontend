@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-
+import API_BASE from "@/app/BaseUrl";
 interface ServiceDetailPageProps {
     params: Promise<{ id: string }>; 
 }
@@ -23,7 +23,7 @@ interface Service {
 }
 
 export default async function ServiceDetailPage({ params }: ServiceDetailPageProps) {
-  const API_BASE = "https://lawservicesbackend.onrender.com";
+ 
    const { id } = await params;
 
   const res = await fetch(`${API_BASE}/api/v1/services/${id}`, {

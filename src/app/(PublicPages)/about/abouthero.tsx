@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { motion} from "framer-motion";
 import { heroImageVariants, heroTextVariants, heroVariants,statVariants } from "@/app/animation";
+import API_BASE from "@/app/BaseUrl";
 
 interface AboutStat {
   label: string;
@@ -20,7 +21,7 @@ interface AboutData {
 }
 
 export default function AboutPage() {
-  const API_BASE="https://lawservicesbackend.onrender.com"
+  
   const [aboutData, setAboutData] = useState<AboutData | null>(null);
   const [loading, setLoading] = useState(true);
 

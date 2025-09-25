@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
 import { useForm, useFieldArray, Control, UseFormRegister } from "react-hook-form";
-
+import API_BASE from "@/app/BaseUrl";
 interface AboutStat {
   label: string;
   value: string;
@@ -91,7 +91,7 @@ const StatsSection: React.FC<{
 );
 
 export default function AdminAboutPage() {
-  const API_BASE = "https://lawservicesbackend.onrender.com";
+ 
   const [about, setAbout] = useState<AboutData | null>(null);
   const [selectedHeroFile, setSelectedHeroFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);

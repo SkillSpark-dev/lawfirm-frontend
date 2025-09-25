@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
-
+import API_BASE from "@/app/BaseUrl";
 interface AppointmentData {
   _id: string;
   name: string;
@@ -12,7 +12,7 @@ interface AppointmentData {
   time: string;
 }
 
-const API_BASE = "https://lawservicesbackend.onrender.com";
+
 
 const AdminAppointmentsPage: React.FC = () => {
   const [appointments, setAppointments] = useState<AppointmentData[]>([]);

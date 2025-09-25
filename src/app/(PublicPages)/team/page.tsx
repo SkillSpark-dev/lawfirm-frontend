@@ -5,7 +5,8 @@ import Image from "next/image";
 import { FaLinkedin, FaFacebook } from "react-icons/fa";
 import { motion } from "framer-motion";
 
-import { cardsVariants, imageVariants, textVariants } from "@/app/animation";  
+import { cardsVariants, imageVariants, textVariants } from "@/app/animation"; 
+import API_BASE from "@/app/BaseUrl"; 
 
 interface SocialLinks {
   linkedin?: string;
@@ -26,7 +27,7 @@ interface TeamApiResponse {
 }
 
 const TeamPage: React.FC = () => {
-  const API_BASE="https://lawservicesbackend.onrender.com"
+  
   const [team, setTeam] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import { useState, useEffect, useCallback } from "react";
-
+import API_BASE from "@/app/BaseUrl";
 interface Testimonial {
   _id: string;
   clientName: string;
@@ -11,7 +11,7 @@ interface Testimonial {
 }
 
 export default function AdminTestimonials() {
-  const API_BASE="https://lawservicesbackend.onrender.com"
+  
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);

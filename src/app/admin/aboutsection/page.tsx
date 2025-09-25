@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import HeroForm from "@/compnents/Admin/aboutsection/HeroForm";
 import HeroSectionList from "@/compnents/Admin/aboutsection/HeroSectionList";
+import API_BASE from "@/app/BaseUrl";
 
 interface AboutHeroSection {
   _id?: string;
@@ -34,7 +35,7 @@ export default function AdminAboutHeroPage() {
   const [editSection, setEditSection] = useState<AboutHeroSection | null>(null);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const API_BASE = "https://lawservicesbackend.onrender.com";
+  
 
   const fetchSections = useCallback(async () => {
     setLoading(true);
@@ -47,7 +48,7 @@ export default function AdminAboutHeroPage() {
     } finally {
       setLoading(false);
     }
-  }, [API_BASE]);
+  }, []);
 
   useEffect(() => {
     fetchSections();
