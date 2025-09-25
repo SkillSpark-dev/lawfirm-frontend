@@ -68,17 +68,16 @@ export default function AboutHeroPublicPage() {
           variants={sectionVariants}
         >
           {section.image?.url && (
-            <div className="md:w-1/2 h-64 md:h-auto flex-shrink-0">
+            <div className="md:w-1/2 flex-shrink-0 relative aspect-[4/3]">
               <Image
                 src={section.image.url}
                 alt={section.title}
-                width={500}
-                height={800}
+                fill
                 className=" object-cover"
               />
             </div>
           )}
-          <div className="p-6 md:w-1/2 flex flex-col justify-center text-center md:text-left">
+          <div className="p-6 md:w-1/2 flex flex-col justify-center text-center md:text-left mb:mt-10">
             <h2 className="text-2xl md:text-3xl font-bold mb-4">{section.title}</h2>
             <p className="text-gray-700 mb-4">{section.description}</p>
             {section.buttonText && section.buttonLink && (
