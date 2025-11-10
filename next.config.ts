@@ -1,4 +1,3 @@
-import type { NextConfig } from "next";
 
 const nextConfig ={
 images: {
@@ -9,9 +8,13 @@ images: {
         port: '',
         pathname: '/**',
       },
-    ]
-}
+    ],
+    unoptimized: true,
+},
+output: 'export',
 
 };
 
 export default nextConfig;
+
+
