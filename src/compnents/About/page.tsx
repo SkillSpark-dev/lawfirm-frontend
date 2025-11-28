@@ -5,7 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { imagesVariants, textsVariants, buttonsVariants } from"@/app/animation";
-
+import API_BASE from "@/app/BaseUrl"
 interface AboutStat {
   label: string;
   value: string;
@@ -20,7 +20,7 @@ interface AboutData {
 }
 
 const About = () => {
-  const API_BASE="https://lawservicesbackend.onrender.com"
+  
   const [aboutData, setAboutData] = useState<AboutData | null>(null);
   const [loading, setLoading] = useState(true);
 

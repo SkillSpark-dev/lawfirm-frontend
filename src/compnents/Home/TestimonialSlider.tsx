@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import Slider, { Settings } from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-
+import  API_BASE from "@/app/BaseUrl"
 interface Testimonial {
   _id: string;
   clientName: string;
@@ -16,7 +16,7 @@ interface Testimonial {
 const TestimonialSlider = () => {
   const [testimonials, setTestimonials] = useState<Testimonial[]>([]);
 
-  const API_BASE = "https://lawservicesbackend.onrender.com";
+  
 
   const settings: Settings = {
     dots: true,
