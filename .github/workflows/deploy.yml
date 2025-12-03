@@ -24,9 +24,6 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      - name: Export static files
-        run: npm run export
-
       - name: Archive out folder
         run: tar -czf out.tar.gz out
 
