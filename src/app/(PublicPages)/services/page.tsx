@@ -43,7 +43,7 @@ export default function ServicesPage() {
         const data: ServicesApiResponse = await res.json();
         if (!data.data || !Array.isArray(data.data)) throw new Error("Invalid backend data");
 
-        setServices(data.data);
+        setServices(data?.data);
       } catch (err: unknown) {
         if (err instanceof Error) setError(err.message);
         else setError("Failed to fetch services");
