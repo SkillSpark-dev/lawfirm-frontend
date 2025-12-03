@@ -7,7 +7,6 @@ on:
 
 jobs:
   deploy-production:
-    name: Build and Deploy Next.js to Production
     runs-on: ubuntu-latest
 
     steps:
@@ -20,19 +19,15 @@ jobs:
           node-version: 18
 
       - name: Install dependencies
-        working-directory: ./lawfirm/frontend
         run: npm install --legacy-peer-deps
 
       - name: Build Next.js
-        working-directory: ./lawfirm/frontend
         run: npm run build
 
       - name: Export static files
-        working-directory: ./lawfirm/frontend
         run: npm run export
 
       - name: Archive out folder
-        working-directory: ./lawfirm/frontend
         run: tar -czf out.tar.gz out
 
       - name: Upload export to EC2
@@ -40,7 +35,7 @@ jobs:
           echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
           chmod 600 private_key.pem
           scp -o StrictHostKeyChecking=no -i private_key.pem \
-            lawfirm/frontend/out.tar.gz \
+            out.tar.gz \
             ${{ secrets.USERNAME }}@${{ secrets.HOST_DNS }}:/home/ubuntu/
 
       - name: Extract and deploy to production folder
