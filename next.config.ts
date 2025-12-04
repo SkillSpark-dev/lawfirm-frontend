@@ -13,6 +13,7 @@ images: {
 },
 output: 'export',
  trailingSlash: true,   
+ skipTrailingSlashRedirect: false,
 
 };
 

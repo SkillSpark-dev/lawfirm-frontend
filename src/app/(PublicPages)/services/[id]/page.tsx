@@ -4,6 +4,7 @@ import API_BASE from "@/app/BaseUrl";
 
 /* FORCE STATIC GENERATION (REQUIRED FOR output: export) */
 export const dynamic = "force-static";
+export const dynamicParams = false; // ← ADDED: Required for static export
 export const revalidate = 0;
 
 interface ServiceDetail {
@@ -31,19 +32,28 @@ interface ApiResponse<T> {
 /* REQUIRED FOR STATIC EXPORT */
 export async function generateStaticParams(): Promise<{ id: string }[]> {
   try {
+    console.log("🔍 Fetching services for static generation...");
+    
     const res = await fetch(`${API_BASE}/api/v1/services`, {
       cache: "force-cache",
     });
 
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error("❌ Failed to fetch services:", res.status);
+      return [];
+    }
 
     const data: ApiResponse<Service[]> = await res.json();
-
-    return (data.data || []).map((service) => ({
+    
+    const params = (data.data || []).map((service) => ({
       id: service._id,
     }));
+    
+    console.log("✅ Generated static params for", params.length, "services");
+    
+    return params;
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error in generateStaticParams:", error);
     return [];
   }
 }
@@ -68,7 +78,7 @@ export default async function ServiceDetailPage({
   if (!service) notFound();
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8 mx-auto max-w-7xl">
+    <div className="px-4 sm:px-6 lg:px-8 py-8 mx-auto max-w-7xl" key={id}>
       {/* HEADER */}
       <div className="flex flex-col md:flex-row items-start gap-10 mb-12">
         {service.image?.url && (
