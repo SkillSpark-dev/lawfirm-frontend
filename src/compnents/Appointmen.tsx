@@ -2,14 +2,14 @@
 
 import React, { useState } from "react";
 import { RiCloseLine } from "react-icons/ri";
-
+import API_BASE from "@/app/BaseUrl"
 interface AppointmentFormProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess?: () => void; // callback to refresh list
 }
 
-const API_BASE = "https://lawservicesbackend.onrender.com";
+
 
 const Appointment: React.FC<AppointmentFormProps> = ({ isOpen, onClose, onSuccess }) => {
   const [formData, setFormData] = useState({
