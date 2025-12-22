@@ -8,7 +8,7 @@ import ServicesPage from "../../compnents/servicesCard"
 
 function Page() {
   return (
-    <div className="text-3xl flex flex-col gap-8" >
+    <div className="conatainer mx-auto overflow-hidden text-3xl flex flex-col gap-8" >
    
       <div className="bg-[url('/lawbackground.jpg')] bg-cover bg-center min-h-screen text-white mb-10">
         <Hero />
