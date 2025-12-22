@@ -49,7 +49,7 @@ const About = () => {
     return <div className="flex justify-center items-center h-60 text-xl text-red-600">Failed to load About data.</div>;
 
   return (
-    <section className="px-4 sm:px-8 md:px-16 lg:px-40 py-8 md:py-16 flex flex-col md:flex-row items-center gap-10">
+    <section className=" px-4 sm:px-8 md:px-16 lg:px-40 py-8 md:py-16 flex flex-col md:flex-row items-center gap-10">
 
       {/* Left side (image) */}
       <motion.div

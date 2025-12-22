@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { Facebook, Twitter, Linkedin, Mail } from "lucide-react";
+import { Facebook, Linkedin, Mail } from "lucide-react";
 
 const Footer = () => {
   return (
@@ -9,7 +9,7 @@ const Footer = () => {
         
         {/* Logo / About */}
         <div>
-          <h2 className="text-2xl font-bold text-white mb-4">LawFirm</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Murali Dhar Mishra Law Firm</h2>
           <p className="text-sm leading-6">
             Providing trusted legal solutions with professionalism and integrity.  
             We stand by your side to protect your rights and future.
@@ -30,12 +30,12 @@ const Footer = () => {
         {/* Practice Areas */}
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">Practice Areas</h3>
-          <ul className="space-y-2 text-sm">
+          <Link href="/services" className="space-y-2 text-sm">
             <li>Corporate Law</li>
             <li>Family Law</li>
             <li>Criminal Defense</li>
             <li>Intellectual Property</li>
-          </ul>
+          </Link>
         </div>
 
         {/* Contact Info */}
@@ -47,10 +47,10 @@ const Footer = () => {
 
           {/* Social Icons */}
           <div className="flex gap-4 mt-4">
-            <Link href="#"><Facebook className="w-5 h-5 hover:text-white" /></Link>
-            <Link href="#"><Twitter className="w-5 h-5 hover:text-white" /></Link>
+            <Link href="https://www.facebook.com/mdmishralawfirm/"><Facebook className="w-5 h-5 hover:text-white" /></Link>
+            
             <Link href="#"><Linkedin className="w-5 h-5 hover:text-white" /></Link>
-            <Link href="#"><Mail className="w-5 h-5 hover:text-white" /></Link>
+            <Link href="mailto:mdmishralawfirm@gmail.com"><Mail className="w-5 h-5 hover:text-white" /></Link>
           </div>
         </div>
       </div>
