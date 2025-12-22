@@ -19,7 +19,7 @@ const TestimonialSlider = () => {
   
 
   const settings: Settings = {
-    dots: true,
+    dots: false,
     infinite: true,
     speed: 800,
     slidesToShow: 1,
@@ -43,7 +43,7 @@ const TestimonialSlider = () => {
   }, []);
 
   return (
-    <div className="w-full max-w-md mx-auto bg-white rounded-lg shadow p-4 flex flex-col justify-center h-80">
+    <div className=" w-full max-w-md mx-auto bg-white rounded-lg shadow p-4 flex flex-col justify-center h-80">
       {testimonials.length === 0 ? (
         <p className="text-center text-gray-500">No testimonials available</p>
       ) : (
