@@ -9,7 +9,7 @@ const Footer = () => {
         
         {/* Logo / About */}
         <div>
-          <h2 className="text-2xl font-bold text-white mb-4">LawFirm</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">Murali Dhar Mishra Law Firm</h2>
           <p className="text-sm leading-6">
             Providing trusted legal solutions with professionalism and integrity.  
             We stand by your side to protect your rights and future.
