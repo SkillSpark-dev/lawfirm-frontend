@@ -4,11 +4,11 @@ import AboutHeroPublicPage from './aboutsection'
 
 const page = () => {
   return (
-    <div>
-      <div>
+    <div className='conatiner mx-auto overflow-hidden'>
+      
         <AboutPage />
         <AboutHeroPublicPage />
-      </div>
+      
     </div>
   )
 }

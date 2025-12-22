@@ -68,7 +68,7 @@ export default function ServicesPage({ limit }: ServicesPageProps) {
   const displayedServices = limit ? services.slice(0, limit) : services;
 
   return (
-    <div className="p-6 sm:p-8 max-w-7xl mx-auto">
+    <div className="container overflow-hidden p-6 sm:p-8 max-w-7xl mx-auto">
       <motion.h1
         className="text-3xl sm:text-4xl font-bold mb-8 text-center"
         initial={{ opacity: 0, y: -30 }}

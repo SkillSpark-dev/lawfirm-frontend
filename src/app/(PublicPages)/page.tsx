@@ -2,9 +2,8 @@
 import React from "react";
 import Hero from "@/compnents/Home/hero";
 import AboutPage from "@/compnents/About/page";
-import TeamPage from "./team/page";
-import ServicesPage from "./services/page";
-
+import TeamList from "@/compnents/TeamList";
+import ServicesPage from "../../compnents/servicesCard"
 
 
 function Page() {
@@ -15,12 +14,12 @@ function Page() {
         <Hero />
       </div>
     
-       <ServicesPage/>
-       <div className="bg-[url('/lawbackground.jpg')]"> 
+         <ServicesPage limit={4} />
+       <div className="bg-[url('/lawbackground.jpg')] "> 
          <AboutPage />
             </div>
      
-     <TeamPage/>
+  <TeamList limit={3}/>
 
     
     </div>
