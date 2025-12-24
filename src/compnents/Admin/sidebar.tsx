@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
-  RiDashboardLine,
+  
   RiFolderChartLine,
   RiMoneyDollarCircleLine,
   RiFileListLine,
@@ -28,7 +28,7 @@ interface SidebarProps {
 }
 
 const navLinks: NavItem[] = [
-  { href: "/admin/home", label: "Home", icon: <RiDashboardLine size={20} /> },
+ 
   { href: "/admin/about", label: "About", icon: <CiCircleInfo size={20} /> },
   { href: "/admin/aboutsection", label: "About Section", icon: <TbFileDescription  size={20} /> },
   { href: "/admin/appointment", label: "Appointment", icon: <RiFolderChartLine size={20} /> },
