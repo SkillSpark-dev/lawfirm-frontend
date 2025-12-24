@@ -217,13 +217,15 @@ export default function AdminServicesPage() {
           >
             <div className="flex items-center gap-4">
               {service.image?.url && (
-                <Image
-                  src={service.image.url}
-                  alt={service.serviceCardTitle}
-                  width={80}
-                  height={56}
-                  className="rounded object-cover"
-                />
+               <div className="relative w-20 h-14">
+  <Image
+    src={service.image.url}
+    alt={service.serviceCardTitle}
+    fill
+    className="rounded object-cover"
+  />
+</div>
+
               )}
               <div>
                 <h3 className="text-lg font-bold">{service.serviceCardTitle}</h3>
