@@ -1,0 +1,58 @@
+name: Deploy Next.js Production to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy-production:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install --legacy-peer-deps
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Archive out folder
+        run: tar -czf out.tar.gz out
+
+      - name: Upload export to EC2
+        run: |
+          echo "${{ secrets.EC2_SSH_KEY }}" > private_key.pem
+          chmod 600 private_key.pem
+          scp -o StrictHostKeyChecking=no -i private_key.pem \
+            out.tar.gz \
+            ${{ secrets.USERNAME }}@${{ secrets.HOST_DNS }}:/home/ubuntu/
+
+      - name: Extract and deploy to production folder
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST_DNS }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            PRODUCTION_PATH="/home/ubuntu/tecnospire-projects/lawfirm/frontend"
+            TEMP_PATH="/home/ubuntu/temp-nextjs-production"
+
+            rm -rf "$TEMP_PATH"
+            mkdir -p "$TEMP_PATH"
+            tar -xzf /home/ubuntu/out.tar.gz -C "$TEMP_PATH"
+            rm /home/ubuntu/out.tar.gz
+
+            sudo chown -R ubuntu:ubuntu "$PRODUCTION_PATH"
+
+            rm -rf "$PRODUCTION_PATH"/*
+            cp -r "$TEMP_PATH/out/"* "$PRODUCTION_PATH"/
+
+            sudo systemctl reload nginx
