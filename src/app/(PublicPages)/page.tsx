@@ -19,7 +19,7 @@ function Page() {
          <AboutPage />
             </div>
      
-  <TeamList limit={3}/>
+  <TeamList limit={4}/>
 
     
     </div>
