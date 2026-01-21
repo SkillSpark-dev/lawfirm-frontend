@@ -41,7 +41,7 @@ const Footer = () => {
         {/* Contact Info */}
         <div>
           <h3 className="text-lg font-semibold text-white mb-4">Contact</h3>
-          <p className="text-sm">kathmandu 44600 , Nepal</p>
+          <p className="text-sm">Kathmandu 44600 , Nepal</p>
           <p className="text-sm">Phone: +977-9843372744, 9818582345</p>
           <p className="text-sm">Email: mdmishralawfirm@gmail.com</p>
 
